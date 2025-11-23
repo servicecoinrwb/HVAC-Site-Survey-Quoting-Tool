@@ -153,9 +153,33 @@
         let userId = null;
         let currentSurveyId = null;
 
+        // User-provided Firebase Configuration as a fallback, used if environment variables are missing.
+        const FALLBACK_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
+            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
+            projectId: "hvac-site-survey-quoting-tool",
+            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
+            messagingSenderId: "228511119722",
+            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13",
+            measurementId: "G-69DC64LV90"
+        };
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // IMPORTANT: We use the firebase config provided by the Canvas environment, not the hardcoded one.
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        // Safely determine firebaseConfig, prioritizing environment variables but falling back to the user's provided config.
+        let firebaseConfig = null;
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                firebaseConfig = FALLBACK_FIREBASE_CONFIG;
+                console.warn("Using fallback Firebase configuration.");
+            }
+        } catch (e) {
+            console.error("Error parsing environment Firebase config, falling back.", e);
+            firebaseConfig = FALLBACK_FIREBASE_CONFIG;
+        }
+
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Quoting Constants based on user's initial data dump (using midpoints for ranges)
@@ -634,6 +658,7 @@
         // --- Firebase Initialization and Auth ---
 
         async function initFirebase() {
+            // Check if Firebase config is available (either environment or fallback)
             if (!firebaseConfig) {
                 console.error("Firebase config is missing.");
                 document.getElementById('user-info').textContent = 'Error: Firebase configuration missing.';
@@ -667,7 +692,7 @@
                     spinner.style.display = 'none'; // Hide spinner
 
                     if (user.isAnonymous) {
-                        // User is signed in anonymously via the environment token
+                        // User is signed in anonymously via the environment token or simple fallback
                         userInfoEl.innerHTML = `<span class="text-yellow-600 font-semibold">Signed in as Guest</span> (ID: ${userId}) <span class="text-xs text-gray-500">(Temporary session)</span>`;
                         signInBtn.classList.remove('hidden');
                     } else if (user.email) {

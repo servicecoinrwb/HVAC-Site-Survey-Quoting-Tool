@@ -54,12 +54,52 @@
 
             <!-- Site Information -->
             <div class="p-5 bg-slate-100 rounded-lg border-l-4 border-sky-500">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Site Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Site & Job Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    
+                    <!-- Row 1: Job Info -->
                     <div>
-                        <label for="site-name" class="label-xs">Site Name / Location</label>
-                        <input type="text" id="site-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Main Street Office, Customer X">
+                        <label for="job-no" class="label-xs">Job No.</label>
+                        <input type="text" id="job-no" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 3978184">
                     </div>
+                    <div>
+                        <label for="company-name" class="label-xs">Company</label>
+                        <input type="text" id="company-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" value="Mechanical Temp" placeholder="Your Company">
+                    </div>
+                    <div>
+                        <label for="view-ref" class="label-xs">View Ref (Company DBA)</label>
+                        <input type="text" id="view-ref" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., MT-DBA">
+                    </div>
+                    <div>
+                        <label for="location-type" class="label-xs">Location Type</label>
+                        <select id="location-type" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
+                            <option value="Commercial">Commercial</option>
+                            <option value="Residential">Residential</option>
+                            <option value="Industrial">Industrial</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 2: Customer & Billing -->
+                    <div class="md:col-span-2">
+                        <label for="customer-name" class="label-xs">Customer Name (Site Contact)</label>
+                        <input type="text" id="customer-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Rally House #064">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="bill-to" class="label-xs">Bill To</label>
+                        <input type="text" id="bill-to" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Sampler Stores">
+                    </div>
+                    
+                    <!-- Row 3: Address & Site Name -->
+                    <div class="md:col-span-3">
+                        <label for="service-address" class="label-xs">Service Address (with City, State, Zip)</label>
+                        <input type="text" id="service-address" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 43575 W Oaks Dr, Novi, MI 48377, USA">
+                    </div>
+                    <div>
+                        <label for="site-name" class="label-xs">Site Name (Friendly Name)</label>
+                        <input type="text" id="site-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Novi Mall">
+                    </div>
+                    
+                    <!-- Row 4: Access & NTE -->
                     <div>
                         <label for="roof-access" class="label-xs">Roof Access</label>
                         <select id="roof-access" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
@@ -69,18 +109,30 @@
                             <option value="Unknown">Unknown</option>
                         </select>
                     </div>
+                    <div>
+                        <label for="nte-limit" class="label-xs">NTE (Not To Exceed) Limit</label>
+                        <input type="number" id="nte-limit" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="e.g., 500.00 (If applicable)">
+                    </div>
                     <div class="md:col-span-2">
                         <label class="label-xs">Number of Units Recorded</label>
                         <p id="unit-count-display" class="text-2xl font-bold text-sky-600 mt-1">0</p>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <button onclick="saveSurvey()" id="save-btn" class="w-full md:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                        Save Survey
-                    </button>
-                    <button onclick="openSurveyList()" class="w-full md:w-auto mt-2 md:mt-0 ml-0 md:ml-3 px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                        Load Existing Survey
-                    </button>
+                
+                <div class="mt-4 flex justify-between">
+                    <div>
+                        <button onclick="saveSurvey()" id="save-btn" class="w-full md:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            Save Survey
+                        </button>
+                        <button onclick="openSurveyList()" class="w-full md:w-auto mt-2 md:mt-0 ml-0 md:ml-3 px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            Load Existing Survey
+                        </button>
+                    </div>
+                    <div id="map-link-container" class="hidden">
+                        <a id="view-map-link" href="#" target="_blank" class="px-4 py-2 bg-sky-500 text-white font-semibold rounded-lg shadow-md hover:bg-sky-600 transition duration-150">
+                            View Map (SVC Address)
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -220,11 +272,359 @@
         ];
 
         let surveyData = {
+            // Updated default structure to include new fields
+            jobNo: '',
+            companyName: 'Mechanical Temp',
+            viewRef: '',
+            customerName: '',
+            billTo: '',
+            serviceAddress: '',
+            locationType: 'Commercial',
+            nteLimit: 0,
             siteName: '',
             roofAccess: 'Yes',
             units: UNITS_DEFAULT.map(u => ({...u}))
         };
 
+        // --- AUTHENTICATION FUNCTIONS ---
+
+        window.signInWithGoogle = async function() {
+            if (!auth) {
+                alertUser("Authentication service is not initialized.", "bg-red-500");
+                return;
+            }
+            const provider = new GoogleAuthProvider();
+            try {
+                // This triggers the Google sign-in flow
+                await signInWithPopup(auth, provider);
+                alertUser("Signed in successfully with Google!", "bg-green-500");
+            } catch (error) {
+                // If the popup is closed by the user, this catch block handles it.
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    console.error("Google Sign-In Error:", error);
+                    alertUser(`Sign-In failed: ${error.message}`, "bg-red-500");
+                }
+            }
+        }
+
+        // --- Utility Functions ---
+
+        /** Generates HTML for the filters list of a unit. */
+        function createFilterListHtml(unit) {
+            if (!unit.filters || unit.filters.length === 0) {
+                return '<p class="text-xs text-gray-500 italic mt-2">No filters recorded.</p>';
+            }
+            
+            return unit.filters.map((filter, index) => `
+                <div class="flex space-x-2 items-center mb-1">
+                    <input type="number" value="${filter.qty || 1}" 
+                           onchange="updateFilter(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
+                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
+                    <input type="text" value="${filter.size || ''}" 
+                           onchange="updateFilter(${unit.id}, ${index}, 'size', this.value)" 
+                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., 16x25x2)">
+                    <button onclick="removeFilter(${unit.id}, ${index})" 
+                            class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
+                            type="button">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        /** Generates HTML for the belts list of a unit. */
+        function createBeltListHtml(unit) {
+            if (!unit.belts || unit.belts.length === 0) {
+                return '<p class="text-xs text-gray-500 italic mt-2">No belts recorded.</p>';
+            }
+
+            return unit.belts.map((belt, index) => `
+                <div class="flex space-x-2 items-center mb-1">
+                    <input type="number" value="${belt.qty || 1}" 
+                           onchange="updateBelt(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
+                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
+                    <input type="text" value="${belt.size || ''}" 
+                           onchange="updateBelt(${unit.id}, ${index}, 'size', this.value)" 
+                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., A35, B50)">
+                    <button onclick="removeBelt(${unit.id}, ${index})" 
+                            class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
+                            type="button">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                    </button>
+                </button>
+                </div>
+            `).join('');
+        }
+
+
+        /** Generates HTML for a single unit card. */
+        function createUnitCardHtml(unit) {
+            const unitTypes = ['RTU', 'Furnace', 'Condensing Unit', 'Split System', 'VAV', 'Boiler', 'Other'];
+            const btuOptions = ['NA', '50,000-100,000', '100,000-150,000', '150,000-250,000', '250,000+'];
+            const beltDDOptions = ['DD - Direct Drive', 'Belt Driven', 'NA'];
+
+            const unitTypeOptions = unitTypes.map(type =>
+                `<option value="${type}" ${unit.type === type ? 'selected' : ''}>${type}</option>`
+            ).join('');
+
+            const btuRatingOptions = btuOptions.map(btu =>
+                `<option value="${btu}" ${unit.btuRating === btu ? 'selected' : ''}>${btu}</option>`
+            ).join('');
+
+            const totalUnitCost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
+
+            return `
+                <div id="unit-${unit.id}" class="bg-slate-50 p-4 border border-gray-200 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-gray-700">Unit #${unit.unitNumber}</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleDetails(${unit.id})" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition duration-150" type="button">
+                                ${unit.showDetails ? 'Hide Details' : 'Show Details'}
+                            </button>
+                            <button onclick="removeUnit(${unit.id})" class="text-red-500 hover:text-red-700 transition duration-150" type="button">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ${unit.showDetails ? 'block' : 'hidden'}" id="unit-details-${unit.id}">
+                        <!-- Row 1: Brand, Model, Serial Number -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="label-xs">Brand</label>
+                                <input type="text" value="${unit.brand || ''}" onchange="updateUnit(${unit.id}, 'brand', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Carrier, Trane, etc.">
+                            </div>
+                            <div>
+                                <label class="label-xs">Model</label>
+                                <input type="text" value="${unit.model || ''}" onchange="updateUnit(${unit.id}, 'model', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 39LNA08">
+                            </div>
+                            <div>
+                                <label class="label-xs">Serial Number</label>
+                                <input type="text" value="${unit.serialNumber || ''}" onchange="updateUnit(${unit.id}, 'serialNumber', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Data tag info">
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Type, Tonnage, BTU, Drive -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="label-xs">Type</label>
+                                <select onchange="updateUnit(${unit.id}, 'type', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
+                                    ${unitTypeOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="label-xs">Tonnage / Size</label>
+                                <input type="text" value="${unit.tonnage || ''}" onchange="updateUnit(${unit.id}, 'tonnage', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 5 Tons">
+                            </div>
+                            <div>
+                                <label class="label-xs">BTU Rating</label>
+                                <select onchange="updateUnit(${unit.id}, 'btuRating', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
+                                    ${btuRatingOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="label-xs">Drive Type</label>
+                                <select onchange="updateUnit(${unit.id}, 'beltDD', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
+                                    ${beltDDOptions.map(bd => `<option value="${bd}" ${unit.beltDD === bd ? 'selected' : ''}>${bd}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 3: Filters (Dynamic List) -->
+                        <div class="p-3 bg-white border border-gray-200 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="label-xs font-bold text-gray-800">Filter Sizes & Quantities</label>
+                                <button onclick="addFilter(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Filter</button>
+                            </div>
+                            <div id="filter-list-${unit.id}">
+                                ${createFilterListHtml(unit)}
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Belts (Dynamic List) -->
+                        <div class="p-3 bg-white border border-gray-200 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="label-xs font-bold text-gray-800">Belt Sizes & Quantities</label>
+                                <button onclick="addBelt(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Belt</button>
+                            </div>
+                            <div id="belt-list-${unit.id}">
+                                ${createBeltListHtml(unit)}
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Refrigerant, VAV, Coil Clean Flag -->
+                        <div class="grid grid-cols-4 gap-3">
+                            <div class="col-span-2">
+                                <label class="label-xs">Refrigerant Type</label>
+                                <input type="text" value="${unit.refrigerantType || ''}" onchange="updateUnit(${unit.id}, 'refrigerantType', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="R-410A, R-22, etc.">
+                            </div>
+                            <div>
+                                <label class="label-xs">VAV Boxes (Count)</label>
+                                <input type="number" value="${unit.vavCount || 0}" onchange="updateUnit(${unit.id}, 'vavCount', parseInt(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0">
+                            </div>
+                            <div class="flex items-center pt-3">
+                                <input type="checkbox" id="coil-clean-${unit.id}" ${unit.requiresCoilClean ? 'checked' : ''} onchange="updateUnit(${unit.id}, 'requiresCoilClean', this.checked)" class="toggle-checkbox h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
+                                <label for="coil-clean-${unit.id}" class="ml-2 block text-sm font-medium text-gray-700">Requires Coil Wash</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 6: Material Costs -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="label-xs">Coil Cleaner Material ($)</label>
+                                <input type="number" value="${unit.coilCleanerMaterial || 0}" onchange="updateUnit(${unit.id}, 'coilCleanerMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="label-xs">Addtl Material ($)</label>
+                                <input type="number" value="${unit.additionalMaterial || 0}" onchange="updateUnit(${unit.id}, 'additionalMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="label-xs">Base Unit PM Price ($)</label>
+                                <input type="number" value="${unit.basePMCost || 0}" onchange="updateUnit(${unit.id}, 'basePMCost', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 100">
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="label-xs">Notes (Access, Condition, Belt Type, Other Details)</label>
+                            <textarea onchange="updateUnit(${unit.id}, 'notes', this.value)" rows="2" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Easy access, unit needs new belts, data tag picture taken.">${unit.notes || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing / Notes Summary -->
+            <div class="p-5 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">3. Quoting Summary</h2>
+                <p class="text-sm text-gray-600 mb-4">Estimates based on your internal pricing structure.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border">
+                        <h3 class="font-bold text-sky-700">Estimated Total Cost Per Visit</h3>
+                        <p class="text-3xl font-bold text-green-600 mt-2">
+                            $<span id="pm-total-display">0.00</span>
+                        </p>
+                        <p class="text-xs text-gray-500 italic mt-1">
+                            Base Trip Labor ($430) + Unit PMs + Addtl Costs (VAV, Coil Clean, Materials)
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-lg shadow-sm border">
+                        <h3 class="font-bold text-sky-700">Service Frequency Estimates</h3>
+                        <ul class="space-y-1 mt-2">
+                            <li class="flex justify-between border-b pb-1"><span>Annual (1x):</span> <span class="font-semibold text-gray-800">$<span id="annual-total">0.00</span></span></li>
+                            <li class="flex justify-between border-b py-1"><span>Semi-Annual (2x):</span> <span class="font-semibold text-gray-800">$<span id="semi-annual-total">0.00</span></span></li>
+                            <li class="flex justify-between pt-1"><span>Quarterly (4x):</span> <span class="font-semibold text-gray-800">$<span id="quarterly-total">0.00</span></span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-3 bg-gray-100 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">Detailed Cost Breakdown (Per Visit)</h3>
+                    <ul class="list-disc list-inside space-y-1 text-xs text-gray-700">
+                        <li>**Base Trip/Labor ($430.00):** Fixed cost for service truck/base time.</li>
+                        <li>**Unit PM Cost:** $<span id="breakdown-unit-pm">0.00</span> (Sum of all individual unit PM prices)</li>
+                        <li>**VAV Start-up Cost:** $<span id="breakdown-vav">0.00</span> (Calculated at $15 per VAV box)</li>
+                        <li>**Coil Cleaning Labor/Fee:** $<span id="breakdown-coil-clean-fee">0.00</span> (Calculated at $45 < 10T or $60 > 10T per unit marked for wash)</li>
+                        <li>**Addtl Material Cost:** $<span id="breakdown-material">0.00</span> (Sum of Additional Material and Coil Cleaner Material costs)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Overlay to prevent interaction when not authenticated -->
+        <div id="auth-overlay" class="absolute inset-0 bg-white bg-opacity-90 rounded-xl shadow-lg flex items-center justify-center p-8 text-center hidden">
+            <p class="text-xl text-gray-700 font-semibold">Please sign in with Google to access the Site Survey tool.</p>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs, updateDoc, deleteDoc, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase and App variables
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let currentSurveyId = null;
+
+        // User-provided Firebase Configuration as a fallback, used if environment variables are missing.
+        const FALLBACK_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
+            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
+            projectId: "hvac-site-survey-quoting-tool",
+            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
+            messagingSenderId: "228511119722",
+            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13",
+            measurementId: "G-69DC64LV90"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // Safely determine firebaseConfig, prioritizing environment variables but falling back to the user's provided config.
+        let firebaseConfig = null;
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                firebaseConfig = FALLBACK_FIREBASE_CONFIG;
+                console.warn("Using fallback Firebase configuration.");
+            }
+        } catch (e) {
+            console.error("Error parsing environment Firebase config, falling back.", e);
+            firebaseConfig = FALLBACK_FIREBASE_CONFIG;
+        }
+
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Quoting Constants based on user's initial data dump (using midpoints for ranges)
+        const QUOTE_CONSTANTS = {
+            BASE_TRIP_LABOR: 430, // $430 for Parts/Labor
+            VAV_ADD_ON: 15,       // $15 per VAV box
+            COIL_CLEAN_UNDER_10T: 45, // Midpoint of $35-$55
+            COIL_CLEAN_OVER_10T: 60   // Midpoint of $55-$65
+        };
+
+        const UNITS_DEFAULT = [
+            { 
+                id: Date.now() + 1, 
+                unitNumber: 1, 
+                type: 'RTU', 
+                brand: 'Carrier', 
+                model: '39LNA', 
+                serialNumber: 'X123456789', 
+                btuRating: '100,000-150,000', 
+                tonnage: '5 Tons', 
+                filters: [{ qty: 1, size: '16x25x2' }], 
+                belts: [{ qty: 1, size: 'A35' }], 
+                notes: 'Unit on curb, easy access.', 
+                basePMCost: 100, 
+                coilCleanerMaterial: 15, 
+                additionalMaterial: 0, 
+                requiresCoilClean: true, 
+                refrigerantType: 'R-410A', 
+                vavCount: 0, 
+                showDetails: true 
+            },
+        ];
+
+        let surveyData = {
+            jobNo: '',
+            companyName: 'Mechanical Temp',
+            viewRef: '',
+            customerName: '',
+            billTo: '',
+            serviceAddress: '',
+            locationType: 'Commercial',
+            nteLimit: null, // Changed default to null for number field
+            siteName: '',
+            roofAccess: 'Yes',
+            units: UNITS_DEFAULT.map(u => ({...u}))
+        };
+        
         // --- AUTHENTICATION FUNCTIONS ---
 
         window.signInWithGoogle = async function() {
@@ -441,9 +841,31 @@
                 return; 
             }
 
-            // Update Site Info Inputs
+            // --- Update Site Info Inputs (NEW FIELDS) ---
+            document.getElementById('job-no').value = surveyData.jobNo;
+            document.getElementById('company-name').value = surveyData.companyName;
+            document.getElementById('view-ref').value = surveyData.viewRef;
+            document.getElementById('customer-name').value = surveyData.customerName;
+            document.getElementById('bill-to').value = surveyData.billTo;
+            document.getElementById('service-address').value = surveyData.serviceAddress;
+            document.getElementById('location-type').value = surveyData.locationType;
+            document.getElementById('nte-limit').value = surveyData.nteLimit !== null ? surveyData.nteLimit : '';
+            
+            // Existing fields
             document.getElementById('site-name').value = surveyData.siteName;
             document.getElementById('roof-access').value = surveyData.roofAccess;
+
+            // Update Map Link (dynamically generate Google Maps URL)
+            const mapLink = document.getElementById('view-map-link');
+            const mapLinkContainer = document.getElementById('map-link-container');
+            if (surveyData.serviceAddress) {
+                const encodedAddress = encodeURIComponent(surveyData.serviceAddress);
+                mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+                mapLinkContainer.classList.remove('hidden');
+            } else {
+                mapLinkContainer.classList.add('hidden');
+            }
+
 
             // Update Unit Count Display
             const unitCount = surveyData.units.length;
@@ -667,7 +1089,17 @@
                 return;
             }
 
-            // 1. Update the main surveyData object from top-level inputs
+            // 1. Update the main surveyData object from top-level inputs (NEW MAPPING)
+            surveyData.jobNo = document.getElementById('job-no').value;
+            surveyData.companyName = document.getElementById('company-name').value;
+            surveyData.viewRef = document.getElementById('view-ref').value;
+            surveyData.customerName = document.getElementById('customer-name').value;
+            surveyData.billTo = document.getElementById('bill-to').value;
+            surveyData.serviceAddress = document.getElementById('service-address').value;
+            surveyData.locationType = document.getElementById('location-type').value;
+            surveyData.nteLimit = parseFloat(document.getElementById('nte-limit').value) || null; // Parse as float or set to null
+            
+            // Existing fields
             surveyData.siteName = siteNameInput;
             surveyData.roofAccess = document.getElementById('roof-access').value;
 
@@ -756,28 +1188,37 @@
         /** Loads a specific survey into the form. */
         window.loadSurvey = function(id, data) {
             currentSurveyId = id;
-            // Ensure units array exists and has the necessary UI property
-            const unitsWithUiState = (data.units || []).map(unit => ({
-                ...unit,
-                showDetails: false,
-                requiresCoilClean: unit.requiresCoilClean || false,
-                refrigerantType: unit.refrigerantType || '',
-                vavCount: unit.vavCount || 0,
-                // Handle new fields and ensure legacy field mapping if necessary
-                brand: unit.brand || '',
-                model: unit.model || '',
-                serialNumber: unit.serialNumber || '',
-                filters: unit.filters || [{ qty: 1, size: '' }],
-                belts: unit.belts || [{ qty: 1, size: '' }],
-                basePMCost: unit.basePMCost !== undefined ? unit.basePMCost : unit.price || 0,
-                coilCleanerMaterial: unit.coilCleanerMaterial !== undefined ? unit.coilCleanerMaterial : unit.coilCleaner || 0,
-            }));
-
+            
+            // Map the loaded data to the surveyData object, ensuring defaults/UI states are set
             surveyData = {
+                // NEW FIELDS MAPPING
+                jobNo: data.jobNo || '',
+                companyName: data.companyName || 'Mechanical Temp',
+                viewRef: data.viewRef || '',
+                customerName: data.customerName || '',
+                billTo: data.billTo || '',
+                serviceAddress: data.serviceAddress || '',
+                locationType: data.locationType || 'Commercial',
+                nteLimit: data.nteLimit !== undefined ? data.nteLimit : null,
+
+                // Existing fields
                 siteName: data.siteName || '',
                 roofAccess: data.roofAccess || 'Yes',
-                units: unitsWithUiState
+                
+                // Map units, ensuring nested arrays and UI state are included
+                units: (data.units || []).map(unit => ({
+                    ...unit,
+                    id: unit.id || Date.now(),
+                    showDetails: false, // Default to collapsed on load
+                    requiresCoilClean: unit.requiresCoilClean || false,
+                    vavCount: unit.vavCount || 0,
+                    filters: unit.filters || [{ qty: 1, size: '' }],
+                    belts: unit.belts || [{ qty: 1, size: '' }],
+                    basePMCost: unit.basePMCost !== undefined ? unit.basePMCost : unit.price || 0,
+                    coilCleanerMaterial: unit.coilCleanerMaterial !== undefined ? unit.coilCleanerMaterial : unit.coilCleaner || 0,
+                }))
             };
+
             renderForm();
             closeSurveyList();
         }
@@ -786,13 +1227,21 @@
         window.newSurvey = function() {
             currentSurveyId = null;
             surveyData = {
+                jobNo: '',
+                companyName: 'Mechanical Temp',
+                viewRef: '',
+                customerName: '',
+                billTo: '',
+                serviceAddress: '',
+                locationType: 'Commercial',
+                nteLimit: null,
                 siteName: '',
                 roofAccess: 'Yes',
                 units: []
             };
             renderForm();
             closeSurveyList();
-            document.getElementById('site-name').focus();
+            document.getElementById('job-no').focus();
         }
 
         window.openSurveyList = function() {

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVAC Site Survey</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
+        /* Style for the checkbox/toggle */
+        .toggle-checkbox:checked {
+            @apply bg-indigo-600 border-indigo-600;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="app" class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-6 border-b pb-2">Commercial HVAC Site Survey</h1>
+
+        <!-- Updated Auth Status Section -->
+        <div id="auth-status" class="text-sm mb-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center border border-gray-300">
+            <span id="user-info" class="text-gray-600">
+                <span id="loading-spinner" class="animate-spin inline-block w-4 h-4 border-2 border-t-2 border-blue-500 rounded-full mr-2"></span>
+                Loading authentication...
+            </span>
+            <button id="google-sign-in-btn" onclick="signInWithGoogle()" class="px-3 py-1 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-150 flex items-center hidden">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12.0001 4.75005C14.0772 4.75005 15.6841 5.56707 16.5925 6.45838L19.3664 3.68449C17.6534 1.95679 15.2255 1 12.0001 1C7.29173 1 3.20455 3.7381 1.48701 7.42279L4.99661 10.0275C5.8166 7.44738 8.64761 4.75005 12.0001 4.75005Z"/><path d="M22.5186 11.2334H22.5V11.25H12.0125C11.9796 11.2504 11.9467 11.2504 11.9137 11.2504C11.8596 11.2504 11.8055 11.2504 11.7514 11.2504L11.75 11.25C11.716 11.2504 11.6826 11.2504 11.6493 11.2504C11.637 11.2504 11.6247 11.2504 11.6124 11.2504C11.5947 11.2504 11.577 11.2504 11.5593 11.2504L11.5592 11.2504C11.5235 11.2504 11.4878 11.2504 11.4521 11.2504C11.4398 11.2504 11.4275 11.2504 11.4152 11.2504L11.4147 11.2504C11.3739 11.2504 11.3332 11.2504 11.2924 11.2504L1.75 11.25L1.75 12.75L11.2924 12.7504C11.3739 12.7504 11.4554 12.7504 11.5369 12.7504L11.5592 12.7504C11.5947 12.7504 11.6302 12.7504 11.6657 12.7504L11.6658 12.7504C11.7013 12.7504 11.7368 12.7504 11.7723 12.7504L11.7724 12.7504C11.8079 12.7504 11.8434 12.7504 11.8789 12.7504L11.879 12.7504C11.9145 12.7504 11.95 12.7504 11.9855 12.7504L11.9856 12.7504C12.0211 12.7504 12.0566 12.7504 12.0921 12.7504L12.0922 12.7504C12.1277 12.7504 12.1632 12.7504 12.1987 12.7504L12.1988 12.7504C12.2343 12.7504 12.2698 12.7504 12.3053 12.7504L22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504V11.2334Z"/><path d="M12.0001 20.0001C8.64761 20.0001 5.8166 17.3027 4.99661 14.7225L1.48701 17.3273C3.20455 21.012 7.29173 23.7501 12.0001 23.7501C15.2255 23.7501 17.6534 22.7933 19.3664 21.0656L16.5925 18.2917C15.6841 19.183 14.0772 20.0001 12.0001 20.0001Z"/><path d="M22.5186 11.2334H22.5V11.25L22.5186 11.2334ZM19.3664 3.68449L16.5925 6.45838C16.9427 6.80424 17.2929 7.1501 17.6431 7.49595L21.1528 10.1006C21.4929 9.3879 21.8331 8.67515 22.1733 7.9624L19.3664 3.68449Z"/></svg>
+                Sign in with Google
+            </button>
+        </div>
+
+        <!-- Survey List Modal -->
+        <div id="survey-list-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">Saved Surveys</h2>
+                <div id="surveys-container" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                    <!-- Survey list items will be inserted here -->
+                    <p id="no-surveys" class="text-gray-500 hidden">No saved surveys found.</p>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button onclick="closeSurveyList()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">Close</button>
+                    <button onclick="newSurvey()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150">Start New Survey</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div id="survey-form" class="space-y-8 bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200 hidden">
+
+            <!-- Site Information -->
+            <div class="p-5 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Site Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="site-name" class="block text-sm font-medium text-gray-700">Site Name / Location</label>
+                        <input type="text" id="site-name" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="e.g., Main Street Office, Customer X">
+                    </div>
+                    <div>
+                        <label for="roof-access" class="block text-sm font-medium text-gray-700">Roof Access</label>
+                        <select id="roof-access" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                            <option value="Yes">Yes (Easy Access)</option>
+                            <option value="Yes - Ladder Required">Yes (Ladder Required)</option>
+                            <option value="No">No (All Units Ground Level)</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Number of Units Recorded</label>
+                        <p id="unit-count-display" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button onclick="saveSurvey()" id="save-btn" class="w-full md:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        Save Survey
+                    </button>
+                    <button onclick="openSurveyList()" class="w-full md:w-auto mt-2 md:mt-0 ml-0 md:ml-3 px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        Load Existing Survey
+                    </button>
+                </div>
+            </div>
+
+            <!-- Equipment Details -->
+            <div class="p-5 bg-white rounded-lg border-l-4 border-gray-300">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
+                    2. Equipment Details
+                    <button onclick="addUnit()" class="flex items-center text-sm px-3 py-1 bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition duration-150">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Add New Unit
+                    </button>
+                </h2>
+
+                <div id="units-container" class="space-y-6">
+                    <!-- Unit cards will be injected here -->
+                    <p id="no-units-message" class="text-gray-500 text-center p-4 border rounded-lg">Click "Add New Unit" to begin recording equipment.</p>
+                </div>
+            </div>
+
+            <!-- Pricing / Notes Summary -->
+            <div class="p-5 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">3. Quoting Summary</h2>
+                <p class="text-sm text-gray-600 mb-4">Estimates based on your internal pricing structure.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border">
+                        <h3 class="font-bold text-indigo-700">Estimated Total Cost Per Visit</h3>
+                        <p class="text-3xl font-bold text-green-600 mt-2">
+                            $<span id="pm-total-display">0.00</span>
+                        </p>
+                        <p class="text-xs text-gray-500 italic mt-1">
+                            Base Trip Labor ($430) + Unit PMs + Addtl Costs (VAV, Coil Clean, Materials)
+                        </p>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-lg shadow-sm border">
+                        <h3 class="font-bold text-indigo-700">Service Frequency Estimates</h3>
+                        <ul class="space-y-1 mt-2">
+                            <li class="flex justify-between border-b pb-1"><span>Annual (1x):</span> <span class="font-semibold text-gray-800">$<span id="annual-total">0.00</span></span></li>
+                            <li class="flex justify-between border-b py-1"><span>Semi-Annual (2x):</span> <span class="font-semibold text-gray-800">$<span id="semi-annual-total">0.00</span></span></li>
+                            <li class="flex justify-between pt-1"><span>Quarterly (4x):</span> <span class="font-semibold text-gray-800">$<span id="quarterly-total">0.00</span></span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-3 bg-gray-100 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">Detailed Cost Breakdown (Per Visit)</h3>
+                    <ul class="list-disc list-inside space-y-1 text-xs text-gray-700">
+                        <li>**Base Trip/Labor ($430.00):** Fixed cost for service truck/base time.</li>
+                        <li>**Unit PM Cost:** $<span id="breakdown-unit-pm">0.00</span> (Sum of all individual unit PM prices)</li>
+                        <li>**VAV Start-up Cost:** $<span id="breakdown-vav">0.00</span> (Calculated at $15 per VAV box)</li>
+                        <li>**Coil Cleaning Labor/Fee:** $<span id="breakdown-coil-clean-fee">0.00</span> (Calculated at $45 < 10T or $60 > 10T per unit marked for wash)</li>
+                        <li>**Addtl Material Cost:** $<span id="breakdown-material">0.00</span> (Sum of Additional Material and Coil Cleaner Material costs)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs, updateDoc, deleteDoc, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase and App variables
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let currentSurveyId = null;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // IMPORTANT: We use the firebase config provided by the Canvas environment, not the hardcoded one.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Quoting Constants based on user's initial data dump (using midpoints for ranges)
+        const QUOTE_CONSTANTS = {
+            BASE_TRIP_LABOR: 430, // $430 for Parts/Labor
+            VAV_ADD_ON: 15,       // $15 per VAV box
+            COIL_CLEAN_UNDER_10T: 45, // Midpoint of $35-$55
+            COIL_CLEAN_OVER_10T: 60   // Midpoint of $55-$65
+        };
+
+        const UNITS_DEFAULT = [
+            { id: Date.now() + 1, unitNumber: 1, type: 'RTU', btuRating: '100,000-150,000', tonnage: '5 Tons', filterQty: 1, filterSize: '16x25x2', beltDD: 'DD - Direct Drive', notes: '', basePMCost: 100, coilCleanerMaterial: 0, additionalMaterial: 0, requiresCoilClean: false, refrigerantType: 'R-410A', vavCount: 0, showDetails: true },
+        ];
+
+        let surveyData = {
+            siteName: '',
+            roofAccess: 'Yes',
+            units: UNITS_DEFAULT.map(u => ({...u}))
+        };
+
+        // --- AUTHENTICATION FUNCTIONS ---
+
+        window.signInWithGoogle = async function() {
+            if (!auth) {
+                alertUser("Authentication service is not initialized.", "bg-red-500");
+                return;
+            }
+            const provider = new GoogleAuthProvider();
+            try {
+                // You can add a check here for existing anonymous user if you want to link accounts,
+                // but for simplicity, we'll just sign in the Google user.
+                await signInWithPopup(auth, provider);
+                alertUser("Signed in successfully with Google!", "bg-green-500");
+            } catch (error) {
+                console.error("Google Sign-In Error:", error);
+                alertUser(`Sign-In failed: ${error.message}`, "bg-red-500");
+            }
+        }
+
+        // --- Utility Functions ---
+
+        /** Generates HTML for a single unit card. */
+        function createUnitCardHtml(unit) {
+            const unitTypes = ['RTU', 'Furnace', 'Condensing Unit', 'Split System', 'VAV', 'Boiler', 'Other'];
+            const btuOptions = ['NA', '50,000-100,000', '100,000-150,000', '150,000-250,000', '250,000+'];
+            const beltDDOptions = ['DD - Direct Drive', 'Belt Driven', 'NA'];
+
+            const unitTypeOptions = unitTypes.map(type =>
+                `<option value="${type}" ${unit.type === type ? 'selected' : ''}>${type}</option>`
+            ).join('');
+
+            const btuRatingOptions = btuOptions.map(btu =>
+                `<option value="${btu}" ${unit.btuRating === btu ? 'selected' : ''}>${btu}</option>`
+            ).join('');
+
+            const beltDDHtml = beltDDOptions.map(bd =>
+                `<option value="${bd}" ${unit.beltDD === bd ? 'selected' : ''}>${bd}</option>`
+            ).join('');
+
+            // Calculate the total unit cost for display
+            const totalUnitCost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
+
+            return `
+                <div id="unit-${unit.id}" class="bg-gray-50 p-4 border border-gray-200 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-gray-700">Unit #${unit.unitNumber}</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleDetails(${unit.id})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition duration-150">
+                                ${unit.showDetails ? 'Hide Details' : 'Show Details'}
+                            </button>
+                            <button onclick="removeUnit(${unit.id})" class="text-red-500 hover:text-red-700 transition duration-150">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ${unit.showDetails ? 'block' : 'hidden'}" id="unit-details-${unit.id}">
+                        <!-- Row 1: Type, Tonnage, BTU, Drive -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Type</label>
+                                <select onchange="updateUnit(${unit.id}, 'type', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border">
+                                    ${unitTypeOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Tonnage / Size</label>
+                                <input type="text" value="${unit.tonnage || ''}" onchange="updateUnit(${unit.id}, 'tonnage', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="e.g., 5 Tons">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">BTU Rating</label>
+                                <select onchange="updateUnit(${unit.id}, 'btuRating', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border">
+                                    ${btuRatingOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Belt / Drive</label>
+                                <select onchange="updateUnit(${unit.id}, 'beltDD', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border">
+                                    ${beltDDHtml}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Filters and Custom Costs -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Filter QTY</label>
+                                <input type="number" value="${unit.filterQty || 1}" onchange="updateUnit(${unit.id}, 'filterQty', parseInt(this.value) || 0)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0">
+                            </div>
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-600">Filter Size (e.g., 16x25x2)</label>
+                                <input type="text" value="${unit.filterSize || ''}" onchange="updateUnit(${unit.id}, 'filterSize', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="16x25x2">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-xs font-medium text-gray-600">Base Unit PM Price ($)</label>
+                                <input type="number" value="${unit.basePMCost || 0}" onchange="updateUnit(${unit.id}, 'basePMCost', parseFloat(this.value) || 0)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="e.g., 100">
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Refrigerant, VAV, Coil Clean Flag -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-600">Refrigerant Type (e.g., R-410A)</label>
+                                <input type="text" value="${unit.refrigerantType || ''}" onchange="updateUnit(${unit.id}, 'refrigerantType', this.value)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="R-410A, R-22, etc.">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">VAV Boxes (Count)</label>
+                                <input type="number" value="${unit.vavCount || 0}" onchange="updateUnit(${unit.id}, 'vavCount', parseInt(this.value) || 0)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0">
+                            </div>
+                            <div class="flex items-center pt-3">
+                                <input type="checkbox" id="coil-clean-${unit.id}" ${unit.requiresCoilClean ? 'checked' : ''} onchange="updateUnit(${unit.id}, 'requiresCoilClean', this.checked)" class="toggle-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                <label for="coil-clean-${unit.id}" class="ml-2 block text-sm font-medium text-gray-700">Requires Coil Wash</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 4: Material Costs -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Coil Cleaner Material ($)</label>
+                                <input type="number" value="${unit.coilCleanerMaterial || 0}" onchange="updateUnit(${unit.id}, 'coilCleanerMaterial', parseFloat(this.value) || 0)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">Addtl Material ($)</label>
+                                <input type="number" value="${unit.additionalMaterial || 0}" onchange="updateUnit(${unit.id}, 'additionalMaterial', parseFloat(this.value) || 0)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-xs font-medium text-gray-600">Unit Cost (Est.)</label>
+                                <p class="text-base font-semibold text-indigo-600 pt-2">
+                                    $${totalUnitCost.toFixed(2)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600">Notes (Access, Condition, Belt Type, Other Details)</label>
+                            <textarea onchange="updateUnit(${unit.id}, 'notes', this.value)" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="e.g., Easy access, unit needs new belts, data tag picture taken.">${unit.notes || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /** Renders the entire survey form based on the current surveyData object and performs new calculations. */
+        function renderForm() {
+            // Update Site Info Inputs
+            document.getElementById('site-name').value = surveyData.siteName;
+            document.getElementById('roof-access').value = surveyData.roofAccess;
+
+            // Update Unit Count Display
+            const unitCount = surveyData.units.length;
+            document.getElementById('unit-count-display').textContent = unitCount;
+            document.getElementById('summary-unit-count').textContent = unitCount;
+
+            // Update Units Container
+            const container = document.getElementById('units-container');
+            if (unitCount === 0) {
+                container.innerHTML = `<p id="no-units-message" class="text-gray-500 text-center p-4 border rounded-lg">Click "Add New Unit" to begin recording equipment.</p>`;
+            } else {
+                container.innerHTML = surveyData.units
+                    .sort((a, b) => a.unitNumber - b.unitNumber)
+                    .map(createUnitCardHtml).join('');
+            }
+
+            // --- REFINED QUOTING SUMMARY LOGIC ---
+            
+            let totalUnitPMCost = 0; // Sum of unit.basePMCost
+            let totalVAVCost = 0;
+            let totalCoilCleanFee = 0; // Coil wash labor/fee
+            let totalMaterialCost = 0; // Sum of unit.additionalMaterial + unit.coilCleanerMaterial
+
+            surveyData.units.forEach(unit => {
+                // Parse tonnage to determine coil clean fee tier
+                const tonnageMatch = unit.tonnage ? unit.tonnage.match(/(\d+\.?\d*)/) : null;
+                const tonnage = tonnageMatch ? parseFloat(tonnageMatch[0]) : 0;
+
+                // 1. Unit PM Cost (Base labor/parts per unit)
+                totalUnitPMCost += (unit.basePMCost || 0);
+
+                // 2. VAV Cost (Start-up add $15 to ea VAV)
+                if ((unit.vavCount || 0) > 0) {
+                    totalVAVCost += unit.vavCount * QUOTE_CONSTANTS.VAV_ADD_ON;
+                }
+
+                // 3. Coil Cleaning Labor Fee (Condenser coil wash)
+                if (unit.requiresCoilClean) {
+                    if (tonnage < 10 && tonnage > 0) {
+                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_UNDER_10T;
+                    } else if (tonnage >= 10) {
+                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_OVER_10T;
+                    } else {
+                        // Fallback if tonnage is unknown, assume lower tier for quote safety
+                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_UNDER_10T;
+                    }
+                }
+
+                // 4. Material Costs (Additional Material + Coil Cleaner Material)
+                totalMaterialCost += (unit.additionalMaterial || 0) + (unit.coilCleanerMaterial || 0);
+            });
+
+            // TOTAL PM PRICE PER VISIT
+            const TOTAL_VISIT_PRICE = QUOTE_CONSTANTS.BASE_TRIP_LABOR + totalUnitPMCost + totalVAVCost + totalCoilCleanFee + totalMaterialCost;
+
+            // Update Summary Display
+            document.getElementById('pm-total-display').textContent = TOTAL_VISIT_PRICE.toFixed(2);
+            document.getElementById('annual-total').textContent = TOTAL_VISIT_PRICE.toFixed(2);
+            document.getElementById('semi-annual-total').textContent = (TOTAL_VISIT_PRICE * 2).toFixed(2);
+            document.getElementById('quarterly-total').textContent = (TOTAL_VISIT_PRICE * 4).toFixed(2);
+
+            // Update Breakdown Display
+            document.getElementById('breakdown-unit-pm').textContent = totalUnitPMCost.toFixed(2);
+            document.getElementById('breakdown-vav').textContent = totalVAVCost.toFixed(2);
+            document.getElementById('breakdown-coil-clean-fee').textContent = totalCoilCleanFee.toFixed(2);
+            document.getElementById('breakdown-material').textContent = totalMaterialCost.toFixed(2);
+        }
+
+        /** Saves the current state of the form to Firestore. */
+        async function saveSurvey() {
+            if (!userId) {
+                console.error("Authentication not ready. Cannot save.");
+                alertUser("Please sign in to save your survey.", "bg-red-500");
+                return;
+            }
+
+            const siteNameInput = document.getElementById('site-name').value.trim();
+            if (!siteNameInput) {
+                alertUser("Please enter a Site Name before saving.", "bg-red-500");
+                return;
+            }
+
+            // 1. Update the main surveyData object from top-level inputs
+            surveyData.siteName = siteNameInput;
+            surveyData.roofAccess = document.getElementById('roof-access').value;
+
+            // 2. Determine document reference (use currentSurveyId or generate new one)
+            if (!currentSurveyId) {
+                // If it's a brand new survey, create an ID based on name and timestamp
+                currentSurveyId = `survey-${Date.now()}`;
+            }
+
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/hvac_surveys`, currentSurveyId);
+
+            // 3. Prepare data for Firestore (cleanup)
+            const dataToSave = {
+                ...surveyData,
+                units: surveyData.units.map(unit => {
+                    // Remove temporary UI state property before saving
+                    const { showDetails, ...rest } = unit;
+                    return rest;
+                }),
+                lastUpdated: serverTimestamp()
+            };
+
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            try {
+                await setDoc(docRef, dataToSave, { merge: true });
+                alertUser(`Survey "${surveyData.siteName}" saved successfully!`, "bg-green-500");
+                // Update the currentSurveyId to be persistent across sessions
+                currentSurveyId = docRef.id;
+            } catch (error) {
+                console.error("Error saving document: ", error);
+                alertUser("Error saving survey. See console for details.", "bg-red-500");
+            } finally {
+                saveBtn.textContent = 'Save Survey';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // --- CRUD Operations for Units ---
+
+        window.addUnit = function() {
+            const nextUnitNumber = surveyData.units.length > 0
+                ? Math.max(...surveyData.units.map(u => u.unitNumber)) + 1
+                : 1;
+
+            const newUnit = {
+                id: Date.now(),
+                unitNumber: nextUnitNumber,
+                type: 'RTU',
+                btuRating: 'NA',
+                tonnage: '',
+                filterQty: 1,
+                filterSize: '',
+                beltDD: 'NA',
+                notes: '',
+                basePMCost: 0,
+                coilCleanerMaterial: 0,
+                additionalMaterial: 0,
+                requiresCoilClean: false,
+                refrigerantType: '',
+                vavCount: 0,
+                showDetails: true
+            };
+
+            surveyData.units.push(newUnit);
+            renderForm();
+            saveSurvey();
+        }
+
+        window.updateUnit = function(unitId, key, value) {
+            const unitIndex = surveyData.units.findIndex(u => u.id === unitId);
+            if (unitIndex > -1) {
+                surveyData.units[unitIndex][key] = value;
+                // Re-render only if the update impacts the summary or a calculated field
+                if (['basePMCost', 'coilCleanerMaterial', 'additionalMaterial', 'tonnage', 'requiresCoilClean', 'vavCount'].includes(key)) {
+                    renderForm();
+                }
+                saveSurvey(); // Save changes to Firestore
+            }
+        }
+
+        window.removeUnit = function(unitId) {
+            // Use custom UI instead of window.confirm
+            if (!confirm("Are you sure you want to remove this unit?")) return;
+
+            surveyData.units = surveyData.units.filter(u => u.id !== unitId);
+            // Renumber units for clean display
+            surveyData.units = surveyData.units.map((u, index) => ({
+                ...u,
+                unitNumber: index + 1
+            }));
+            renderForm();
+            saveSurvey();
+        }
+
+        window.toggleDetails = function(unitId) {
+            const unit = surveyData.units.find(u => u.id === unitId);
+            if (unit) {
+                unit.showDetails = !unit.showDetails;
+                // Only toggle the specific div for efficiency
+                const detailsDiv = document.getElementById(`unit-details-${unitId}`);
+                if (detailsDiv) {
+                    detailsDiv.classList.toggle('hidden', !unit.showDetails);
+                }
+            }
+        }
+
+        // --- Survey Management (Load/New) ---
+
+        /** Fetches the list of all saved surveys for the current user. */
+        async function fetchSurveysList() {
+            if (!userId) return; // Prevent fetching if not signed in
+
+            const surveysRef = collection(db, `artifacts/${appId}/users/${userId}/hvac_surveys`);
+            // Query for the latest 10 surveys
+            const q = query(surveysRef, orderBy('lastUpdated', 'desc'), limit(10));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                const surveysContainer = document.getElementById('surveys-container');
+                surveysContainer.innerHTML = ''; // Clear previous list
+                document.getElementById('no-surveys').classList.add('hidden');
+
+                if (querySnapshot.empty) {
+                    document.getElementById('no-surveys').classList.remove('hidden');
+                    return;
+                }
+
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated.seconds * 1000).toLocaleString() : 'N/A';
+                    const unitCount = data.units ? data.units.length : 0;
+
+                    const listItem = document.createElement('div');
+                    listItem.className = 'flex justify-between items-center p-3 bg-gray-100 rounded-lg border hover:bg-gray-200 cursor-pointer transition duration-150';
+                    listItem.onclick = () => loadSurvey(doc.id, data);
+                    listItem.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-gray-800">${data.siteName || 'Unnamed Survey'}</p>
+                            <p class="text-xs text-gray-600">Units: ${unitCount} | Last Saved: ${lastUpdated}</p>
+                        </div>
+                        <span class="text-indigo-600 text-sm font-medium">Load</span>
+                    `;
+                    surveysContainer.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error("Error fetching surveys list: ", error);
+            }
+        }
+
+        /** Loads a specific survey into the form. */
+        window.loadSurvey = function(id, data) {
+            currentSurveyId = id;
+            // Ensure units array exists and has the necessary UI property
+            const unitsWithUiState = (data.units || []).map(unit => ({
+                ...unit,
+                showDetails: false,
+                requiresCoilClean: unit.requiresCoilClean || false,
+                refrigerantType: unit.refrigerantType || '',
+                vavCount: unit.vavCount || 0,
+                basePMCost: unit.basePMCost !== undefined ? unit.basePMCost : unit.price || 0,
+                coilCleanerMaterial: unit.coilCleanerMaterial !== undefined ? unit.coilCleanerMaterial : unit.coilCleaner || 0,
+            }));
+
+            surveyData = {
+                siteName: data.siteName || '',
+                roofAccess: data.roofAccess || 'Yes',
+                units: unitsWithUiState
+            };
+            renderForm();
+            closeSurveyList();
+        }
+
+        /** Starts a blank new survey. */
+        window.newSurvey = function() {
+            currentSurveyId = null;
+            surveyData = {
+                siteName: '',
+                roofAccess: 'Yes',
+                units: []
+            };
+            renderForm();
+            closeSurveyList();
+            document.getElementById('site-name').focus();
+        }
+
+        window.openSurveyList = function() {
+            fetchSurveysList();
+            document.getElementById('survey-list-modal').classList.remove('hidden');
+        }
+
+        window.closeSurveyList = function() {
+            document.getElementById('survey-list-modal').classList.add('hidden');
+        }
+
+        // --- UI Feedback (Custom Alert) ---
+
+        function alertUser(message, bgColor) {
+            const container = document.getElementById('app');
+            let alertDiv = document.getElementById('custom-alert');
+
+            if (!alertDiv) {
+                alertDiv = document.createElement('div');
+                alertDiv.id = 'custom-alert';
+                alertDiv.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl transition-opacity duration-300 opacity-0';
+                container.appendChild(alertDiv);
+            }
+
+            alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl transition-opacity duration-300 ${bgColor} text-white`;
+            alertDiv.textContent = message;
+
+            // Show the alert
+            setTimeout(() => {
+                alertDiv.style.opacity = '1';
+            }, 10);
+
+            // Hide the alert after 3 seconds
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+            }, 3000);
+        }
+
+        // --- Firebase Initialization and Auth ---
+
+        async function initFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing.");
+                document.getElementById('user-info').textContent = 'Error: Firebase configuration missing.';
+                return;
+            }
+
+            // setLogLevel('debug'); // Uncomment for debugging
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            const userInfoEl = document.getElementById('user-info');
+            const spinner = document.getElementById('loading-spinner');
+            const signInBtn = document.getElementById('google-sign-in-btn');
+
+            // 1. Attempt initial sign-in using environment token
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Initial Authentication error:", error);
+            }
+
+            // 2. Set up Auth State Listener
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    spinner.style.display = 'none'; // Hide spinner
+
+                    if (user.isAnonymous) {
+                        // User is signed in anonymously via the environment token
+                        userInfoEl.innerHTML = `<span class="text-yellow-600 font-semibold">Signed in as Guest</span> (ID: ${userId}) <span class="text-xs text-gray-500">(Temporary session)</span>`;
+                        signInBtn.classList.remove('hidden');
+                    } else if (user.email) {
+                        // User is signed in with Google
+                        userInfoEl.innerHTML = `<span class="text-green-600 font-semibold">Signed in as:</span> ${user.email}`;
+                        signInBtn.classList.add('hidden');
+                    } else {
+                         // Fallback for custom token user or other authenticated users
+                         userInfoEl.innerHTML = `<span class="text-green-600 font-semibold">Authenticated. User ID: </span>${userId}`;
+                         signInBtn.classList.add('hidden');
+                    }
+
+                    document.getElementById('survey-form').classList.remove('hidden');
+                    openSurveyList();
+
+                } else {
+                    userId = null;
+                    spinner.style.display = 'none';
+                    userInfoEl.textContent = 'Not signed in.';
+                    signInBtn.classList.remove('hidden');
+                    document.getElementById('survey-form').classList.add('hidden');
+                }
+            });
+        }
+
+        // Initialize the app when the page loads
+        window.onload = initFirebase;
+    </script>
+</body>
+</html>

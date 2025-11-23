@@ -9,9 +9,9 @@
     <!-- Use Inter font family -->
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
-        /* Style for the checkbox/toggle */
+        /* Style for the checkbox/toggle - Updated to Sky Blue */
         .toggle-checkbox:checked {
-            @apply bg-indigo-600 border-indigo-600;
+            @apply bg-sky-600 border-sky-600;
         }
         .text-input-xs { @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border; }
         .label-xs { @apply block text-xs font-medium text-gray-600; }
@@ -25,10 +25,10 @@
         <!-- Updated Auth Status Section -->
         <div id="auth-status" class="text-sm mb-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center border border-gray-300">
             <span id="user-info" class="text-gray-600">
-                <span id="loading-spinner" class="animate-spin inline-block w-4 h-4 border-2 border-t-2 border-blue-500 rounded-full mr-2"></span>
+                <span id="loading-spinner" class="animate-spin inline-block w-4 h-4 border-2 border-t-2 border-sky-500 rounded-full mr-2"></span>
                 Loading authentication...
             </span>
-            <button id="google-sign-in-btn" onclick="signInWithGoogle()" class="px-3 py-1 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition duration-150 flex items-center hidden">
+            <button id="google-sign-in-btn" onclick="signInWithGoogle()" class="px-3 py-1 bg-sky-600 text-white font-medium rounded-lg shadow-md hover:bg-sky-700 transition duration-150 flex items-center hidden">
                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12.0001 4.75005C14.0772 4.75005 15.6841 5.56707 16.5925 6.45838L19.3664 3.68449C17.6534 1.95679 15.2255 1 12.0001 1C7.29173 1 3.20455 3.7381 1.48701 7.42279L4.99661 10.0275C5.8166 7.44738 8.64761 4.75005 12.0001 4.75005Z"/><path d="M22.5186 11.2334H22.5V11.25H12.0125C11.9796 11.2504 11.9467 11.2504 11.9137 11.2504C11.8596 11.2504 11.8055 11.2504 11.7514 11.2504L11.75 11.25C11.716 11.2504 11.6826 11.2504 11.6493 11.2504C11.637 11.2504 11.6247 11.2504 11.6124 11.2504C11.5947 11.2504 11.577 11.2504 11.5593 11.2504L11.5592 11.2504C11.5235 11.2504 11.4878 11.2504 11.4521 11.2504C11.4398 11.2504 11.4275 11.2504 11.4152 11.2504L11.4147 11.2504C11.3739 11.2504 11.3332 11.2504 11.2924 11.2504L1.75 11.25L1.75 12.75L11.2924 12.7504C11.3739 12.7504 11.4554 12.7504 11.5369 12.7504L11.5592 12.7504C11.5947 12.7504 11.6302 12.7504 11.6657 12.7504L11.6658 12.7504C11.7013 12.7504 11.7368 12.7504 11.7723 12.7504L11.7724 12.7504C11.8079 12.7504 11.8434 12.7504 11.8789 12.7504L11.879 12.7504C11.9145 12.7504 11.95 12.7504 11.9855 12.7504L11.9856 12.7504C12.0211 12.7504 12.0566 12.7504 12.0921 12.7504L12.0922 12.7504C12.1277 12.7504 12.1632 12.7504 12.1987 12.7504L12.1988 12.7504C12.2343 12.7504 12.2698 12.7504 12.3053 12.7504L22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504V11.2334Z"/><path d="M12.0001 20.0001C8.64761 20.0001 5.8166 17.3027 4.99661 14.7225L1.48701 17.3273C3.20455 21.012 7.29173 23.7501 12.0001 23.7501C15.2255 23.7501 17.6534 22.7933 19.3664 21.0656L16.5925 18.2917C15.6841 19.183 14.0772 20.0001 12.0001 20.0001Z"/><path d="M22.5186 11.2334H22.5V11.25L22.5186 11.2334ZM19.3664 3.68449L16.5925 6.45838C16.9427 6.80424 17.2929 7.1501 17.6431 7.49595L21.1528 10.1006C21.4929 9.3879 21.8331 8.67515 22.1733 7.9624L19.3664 3.68449Z"/></svg>
                 Sign in with Google
             </button>
@@ -44,26 +44,25 @@
                 </div>
                 <div class="mt-6 flex justify-end space-x-3">
                     <button onclick="closeSurveyList()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">Close</button>
-                    <button onclick="newSurvey()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150">Start New Survey</button>
+                    <button onclick="newSurvey()" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition duration-150">Start New Survey</button>
                 </div>
             </div>
         </div>
 
         <!-- Main Form -->
-        <!-- Removed 'hidden' class to ensure summary elements are in the DOM on load -->
         <div id="survey-form" class="space-y-8 bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
 
             <!-- Site Information -->
-            <div class="p-5 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <div class="p-5 bg-slate-100 rounded-lg border-l-4 border-sky-500">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Site Information</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="site-name" class="label-xs">Site Name / Location</label>
-                        <input type="text" id="site-name" class="text-input-xs" placeholder="e.g., Main Street Office, Customer X">
+                        <input type="text" id="site-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Main Street Office, Customer X">
                     </div>
                     <div>
                         <label for="roof-access" class="label-xs">Roof Access</label>
-                        <select id="roof-access" class="text-input-xs">
+                        <select id="roof-access" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
                             <option value="Yes">Yes (Easy Access)</option>
                             <option value="Yes - Ladder Required">Yes (Ladder Required)</option>
                             <option value="No">No (All Units Ground Level)</option>
@@ -72,7 +71,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="label-xs">Number of Units Recorded</label>
-                        <p id="unit-count-display" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+                        <p id="unit-count-display" class="text-2xl font-bold text-sky-600 mt-1">0</p>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -89,7 +88,7 @@
             <div class="p-5 bg-white rounded-lg border-l-4 border-gray-300">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
                     2. Equipment Details
-                    <button onclick="addUnit()" class="flex items-center text-sm px-3 py-1 bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition duration-150">
+                    <button onclick="addUnit()" class="flex items-center text-sm px-3 py-1 bg-sky-500 text-white rounded-lg shadow-md hover:bg-sky-600 transition duration-150">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         Add New Unit
                     </button>
@@ -108,7 +107,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div class="bg-white p-3 rounded-lg shadow-sm border">
-                        <h3 class="font-bold text-indigo-700">Estimated Total Cost Per Visit</h3>
+                        <h3 class="font-bold text-sky-700">Estimated Total Cost Per Visit</h3>
                         <p class="text-3xl font-bold text-green-600 mt-2">
                             $<span id="pm-total-display">0.00</span>
                         </p>
@@ -118,7 +117,7 @@
                     </div>
 
                     <div class="bg-white p-3 rounded-lg shadow-sm border">
-                        <h3 class="font-bold text-indigo-700">Service Frequency Estimates</h3>
+                        <h3 class="font-bold text-sky-700">Service Frequency Estimates</h3>
                         <ul class="space-y-1 mt-2">
                             <li class="flex justify-between border-b pb-1"><span>Annual (1x):</span> <span class="font-semibold text-gray-800">$<span id="annual-total">0.00</span></span></li>
                             <li class="flex justify-between border-b py-1"><span>Semi-Annual (2x):</span> <span class="font-semibold text-gray-800">$<span id="semi-annual-total">0.00</span></span></li>
@@ -202,14 +201,12 @@
                 id: Date.now() + 1, 
                 unitNumber: 1, 
                 type: 'RTU', 
-                brand: 'Carrier', // NEW FIELD
-                model: '39LNA', // NEW FIELD
-                serialNumber: 'X123456789', // NEW FIELD
+                brand: 'Carrier', 
+                model: '39LNA', 
+                serialNumber: 'X123456789', 
                 btuRating: '100,000-150,000', 
                 tonnage: '5 Tons', 
-                // Updated to handle multiple filters
                 filters: [{ qty: 1, size: '16x25x2' }], 
-                // Updated to handle multiple belts
                 belts: [{ qty: 1, size: 'A35' }], 
                 notes: 'Unit on curb, easy access.', 
                 basePMCost: 100, 
@@ -261,10 +258,10 @@
                 <div class="flex space-x-2 items-center mb-1">
                     <input type="number" value="${filter.qty || 1}" 
                            onchange="updateFilter(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
-                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0" placeholder="Qty">
+                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
                     <input type="text" value="${filter.size || ''}" 
                            onchange="updateFilter(${unit.id}, ${index}, 'size', this.value)" 
-                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="Size (e.g., 16x25x2)">
+                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., 16x25x2)">
                     <button onclick="removeFilter(${unit.id}, ${index})" 
                             class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
                             type="button">
@@ -284,10 +281,10 @@
                 <div class="flex space-x-2 items-center mb-1">
                     <input type="number" value="${belt.qty || 1}" 
                            onchange="updateBelt(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
-                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" min="0" placeholder="Qty">
+                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
                     <input type="text" value="${belt.size || ''}" 
                            onchange="updateBelt(${unit.id}, ${index}, 'size', this.value)" 
-                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border" placeholder="Size (e.g., A35, B50)">
+                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., A35, B50)">
                     <button onclick="removeBelt(${unit.id}, ${index})" 
                             class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
                             type="button">
@@ -316,11 +313,11 @@
             const totalUnitCost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
 
             return `
-                <div id="unit-${unit.id}" class="bg-gray-50 p-4 border border-gray-200 rounded-lg shadow-sm">
+                <div id="unit-${unit.id}" class="bg-slate-50 p-4 border border-gray-200 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-lg font-bold text-gray-700">Unit #${unit.unitNumber}</h3>
                         <div class="flex space-x-2">
-                            <button onclick="toggleDetails(${unit.id})" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition duration-150" type="button">
+                            <button onclick="toggleDetails(${unit.id})" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition duration-150" type="button">
                                 ${unit.showDetails ? 'Hide Details' : 'Show Details'}
                             </button>
                             <button onclick="removeUnit(${unit.id})" class="text-red-500 hover:text-red-700 transition duration-150" type="button">
@@ -333,15 +330,15 @@
                         <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label class="label-xs">Brand</label>
-                                <input type="text" value="${unit.brand || ''}" onchange="updateUnit(${unit.id}, 'brand', this.value)" class="text-input-xs" placeholder="Carrier, Trane, etc.">
+                                <input type="text" value="${unit.brand || ''}" onchange="updateUnit(${unit.id}, 'brand', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Carrier, Trane, etc.">
                             </div>
                             <div>
                                 <label class="label-xs">Model</label>
-                                <input type="text" value="${unit.model || ''}" onchange="updateUnit(${unit.id}, 'model', this.value)" class="text-input-xs" placeholder="e.g., 39LNA08">
+                                <input type="text" value="${unit.model || ''}" onchange="updateUnit(${unit.id}, 'model', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 39LNA08">
                             </div>
                             <div>
                                 <label class="label-xs">Serial Number</label>
-                                <input type="text" value="${unit.serialNumber || ''}" onchange="updateUnit(${unit.id}, 'serialNumber', this.value)" class="text-input-xs" placeholder="Data tag info">
+                                <input type="text" value="${unit.serialNumber || ''}" onchange="updateUnit(${unit.id}, 'serialNumber', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Data tag info">
                             </div>
                         </div>
 
@@ -349,23 +346,23 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div>
                                 <label class="label-xs">Type</label>
-                                <select onchange="updateUnit(${unit.id}, 'type', this.value)" class="text-input-xs">
+                                <select onchange="updateUnit(${unit.id}, 'type', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
                                     ${unitTypeOptions}
                                 </select>
                             </div>
                             <div>
                                 <label class="label-xs">Tonnage / Size</label>
-                                <input type="text" value="${unit.tonnage || ''}" onchange="updateUnit(${unit.id}, 'tonnage', this.value)" class="text-input-xs" placeholder="e.g., 5 Tons">
+                                <input type="text" value="${unit.tonnage || ''}" onchange="updateUnit(${unit.id}, 'tonnage', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 5 Tons">
                             </div>
                             <div>
                                 <label class="label-xs">BTU Rating</label>
-                                <select onchange="updateUnit(${unit.id}, 'btuRating', this.value)" class="text-input-xs">
+                                <select onchange="updateUnit(${unit.id}, 'btuRating', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
                                     ${btuRatingOptions}
                                 </select>
                             </div>
                             <div>
                                 <label class="label-xs">Drive Type</label>
-                                <select onchange="updateUnit(${unit.id}, 'beltDD', this.value)" class="text-input-xs">
+                                <select onchange="updateUnit(${unit.id}, 'beltDD', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
                                     ${beltDDOptions.map(bd => `<option value="${bd}" ${unit.beltDD === bd ? 'selected' : ''}>${bd}</option>`).join('')}
                                 </select>
                             </div>
@@ -375,7 +372,7 @@
                         <div class="p-3 bg-white border border-gray-200 rounded-lg">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="label-xs font-bold text-gray-800">Filter Sizes & Quantities</label>
-                                <button onclick="addFilter(${unit.id})" class="text-xs px-2 py-0.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-150" type="button">+ Add Filter</button>
+                                <button onclick="addFilter(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Filter</button>
                             </div>
                             <div id="filter-list-${unit.id}">
                                 ${createFilterListHtml(unit)}
@@ -386,7 +383,7 @@
                         <div class="p-3 bg-white border border-gray-200 rounded-lg">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="label-xs font-bold text-gray-800">Belt Sizes & Quantities</label>
-                                <button onclick="addBelt(${unit.id})" class="text-xs px-2 py-0.5 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition duration-150" type="button">+ Add Belt</button>
+                                <button onclick="addBelt(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Belt</button>
                             </div>
                             <div id="belt-list-${unit.id}">
                                 ${createBeltListHtml(unit)}
@@ -397,14 +394,14 @@
                         <div class="grid grid-cols-4 gap-3">
                             <div class="col-span-2">
                                 <label class="label-xs">Refrigerant Type</label>
-                                <input type="text" value="${unit.refrigerantType || ''}" onchange="updateUnit(${unit.id}, 'refrigerantType', this.value)" class="text-input-xs" placeholder="R-410A, R-22, etc.">
+                                <input type="text" value="${unit.refrigerantType || ''}" onchange="updateUnit(${unit.id}, 'refrigerantType', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="R-410A, R-22, etc.">
                             </div>
                             <div>
                                 <label class="label-xs">VAV Boxes (Count)</label>
-                                <input type="number" value="${unit.vavCount || 0}" onchange="updateUnit(${unit.id}, 'vavCount', parseInt(this.value) || 0)" class="text-input-xs" min="0">
+                                <input type="number" value="${unit.vavCount || 0}" onchange="updateUnit(${unit.id}, 'vavCount', parseInt(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0">
                             </div>
                             <div class="flex items-center pt-3">
-                                <input type="checkbox" id="coil-clean-${unit.id}" ${unit.requiresCoilClean ? 'checked' : ''} onchange="updateUnit(${unit.id}, 'requiresCoilClean', this.checked)" class="toggle-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                <input type="checkbox" id="coil-clean-${unit.id}" ${unit.requiresCoilClean ? 'checked' : ''} onchange="updateUnit(${unit.id}, 'requiresCoilClean', this.checked)" class="toggle-checkbox h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
                                 <label for="coil-clean-${unit.id}" class="ml-2 block text-sm font-medium text-gray-700">Requires Coil Wash</label>
                             </div>
                         </div>
@@ -413,22 +410,22 @@
                         <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label class="label-xs">Coil Cleaner Material ($)</label>
-                                <input type="number" value="${unit.coilCleanerMaterial || 0}" onchange="updateUnit(${unit.id}, 'coilCleanerMaterial', parseFloat(this.value) || 0)" class="text-input-xs" min="0" placeholder="0.00">
+                                <input type="number" value="${unit.coilCleanerMaterial || 0}" onchange="updateUnit(${unit.id}, 'coilCleanerMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
                             </div>
                             <div>
                                 <label class="label-xs">Addtl Material ($)</label>
-                                <input type="number" value="${unit.additionalMaterial || 0}" onchange="updateUnit(${unit.id}, 'additionalMaterial', parseFloat(this.value) || 0)" class="text-input-xs" min="0" placeholder="0.00">
+                                <input type="number" value="${unit.additionalMaterial || 0}" onchange="updateUnit(${unit.id}, 'additionalMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
                             </div>
                             <div class="col-span-1">
                                 <label class="label-xs">Base Unit PM Price ($)</label>
-                                <input type="number" value="${unit.basePMCost || 0}" onchange="updateUnit(${unit.id}, 'basePMCost', parseFloat(this.value) || 0)" class="text-input-xs" placeholder="e.g., 100">
+                                <input type="number" value="${unit.basePMCost || 0}" onchange="updateUnit(${unit.id}, 'basePMCost', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 100">
                             </div>
                         </div>
 
                         <!-- Notes -->
                         <div>
                             <label class="label-xs">Notes (Access, Condition, Belt Type, Other Details)</label>
-                            <textarea onchange="updateUnit(${unit.id}, 'notes', this.value)" rows="2" class="text-input-xs" placeholder="e.g., Easy access, unit needs new belts, data tag picture taken.">${unit.notes || ''}</textarea>
+                            <textarea onchange="updateUnit(${unit.id}, 'notes', this.value)" rows="2" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Easy access, unit needs new belts, data tag picture taken.">${unit.notes || ''}</textarea>
                         </div>
                     </div>
                 </div>
@@ -525,13 +522,13 @@
                 id: Date.now(),
                 unitNumber: nextUnitNumber,
                 type: 'RTU',
-                brand: '', // NEW
-                model: '', // NEW
-                serialNumber: '', // NEW
+                brand: '', 
+                model: '', 
+                serialNumber: '', 
                 btuRating: 'NA',
                 tonnage: '',
-                filters: [{ qty: 1, size: '' }], // NEW
-                belts: [{ qty: 1, size: '' }], // NEW
+                filters: [{ qty: 1, size: '' }], 
+                belts: [{ qty: 1, size: '' }], 
                 notes: '',
                 basePMCost: 0,
                 coilCleanerMaterial: 0,
@@ -746,7 +743,7 @@
                             <p class="font-semibold text-gray-800">${data.siteName || 'Unnamed Survey'}</p>
                             <p class="text-xs text-gray-600">Units: ${unitCount} | Last Saved: ${lastUpdated}</p>
                         </div>
-                        <span class="text-indigo-600 text-sm font-medium">Load</span>
+                        <span class="text-sky-600 text-sm font-medium">Load</span>
                     `;
                     surveysContainer.appendChild(listItem);
                 });

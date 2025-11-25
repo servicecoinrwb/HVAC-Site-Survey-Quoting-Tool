@@ -3,704 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HVACPro Survey Tool</title>
+    <title>HVAC Site Survey Tool</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (CDN is required for this standalone single-file tool) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Firebase Compat Library (Easier for single file HTML) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
-
     <style>
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; }
-            .break-inside-avoid { break-inside: avoid; }
-            .break-before-page { break-before: page; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f3f4f6; }
+        [x-cloak] { display: none !important; } /* Hides elements until Alpine loads */
+        
+        /* Standard clean input styles */
+        .input-std { 
+            @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm py-2 px-3 border focus:border-sky-500 focus:ring-sky-500 bg-white; 
+        }
+        .label-std { 
+            @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1; 
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800">
 
-    <div id="root"></div>
+<body class="p-4 md:p-8" x-data="hvacApp" x-cloak>
 
-    <script type="text/babel">
-        // --- ICONS (SVG Replacements for Lucide) ---
-        const Icons = {
-            Camera: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
-            Trash2: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
-            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
-            Save: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
-            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>,
-            Calculator: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>,
-            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>,
-            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-            AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>,
-            Printer: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
-            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-            ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
-            Wrench: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
-            LogIn: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>,
-            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
-            Cloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>,
-            Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
-            Loader: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg>
-        };
-
-        const { useState, useEffect } = React;
-
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
-            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
-            projectId: "hvac-site-survey-quoting-tool",
-            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
-            messagingSenderId: "228511119722",
-            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13",
-            measurementId: "G-69DC64LV90"
-        };
-
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-        // --- COMPONENTS ---
-
-        const Card = ({ children, className = "" }) => (
-            <div className={`bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden ${className}`}>
-                {children}
+    <div class="max-w-6xl mx-auto pb-20">
+        
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 bg-white p-6 rounded-xl shadow-sm">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">HVAC Site Survey</h1>
+                <p class="text-sm text-gray-500 mt-1">Commercial Estimation & Asset Tagging</p>
             </div>
-        );
-
-        const Button = ({ children, onClick, variant = "primary", className = "", type="button", disabled = false }) => {
-            const baseStyle = "px-4 py-2 rounded-md font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
-            const variants = {
-                primary: "bg-blue-600 text-white hover:bg-blue-700",
-                secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200",
-                danger: "bg-red-50 text-red-600 hover:bg-red-100",
-                success: "bg-emerald-600 text-white hover:bg-emerald-700",
-                outline: "border border-slate-300 text-slate-600 hover:bg-slate-50",
-                google: "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
-            };
-            return (
-                <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`}>
-                    {children}
-                </button>
-            );
-        };
-
-        function HVACSurveyApp() {
-            const [activeTab, setActiveTab] = useState('customer');
-            const [showPrintView, setShowPrintView] = useState(false);
             
-            // Auth & Data State
-            const [user, setUser] = useState(null);
-            const [currentSurveyId, setCurrentSurveyId] = useState(null);
-            const [savedSurveys, setSavedSurveys] = useState([]);
-            const [showLoadModal, setShowLoadModal] = useState(false);
-            const [isSaving, setIsSaving] = useState(false);
-            const [isLoadingData, setIsLoadingData] = useState(false);
-
-            // App Data State
-            const [customer, setCustomer] = useState({
-                name: '',
-                address: '',
-                contactName: '',
-                phone: '',
-                email: '',
-                date: new Date().toISOString().split('T')[0]
-            });
-
-            const [units, setUnits] = useState([]);
-            
-            const [pricingConfig, setPricingConfig] = useState({
-                pricePerTon: 35,
-                laborRate: 125,
-                coilCleanerCost: 25,
-                filterMarkup: 1.5,
-                beltMarkup: 1.5,
-                tripCharge: 75,
-                taxRate: 0.06
-            });
-
-            const [supplies, setSupplies] = useState({
-                coilCleanerQty: 0,
-                rags: 0,
-                grease: 0
-            });
-
-            // --- AUTH LISTENERS ---
-            useEffect(() => {
-                const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-                    setUser(currentUser);
-                    if (currentUser) {
-                        fetchSavedSurveys(currentUser.uid);
-                    } else {
-                        setSavedSurveys([]);
-                        setCurrentSurveyId(null);
-                    }
-                });
-                return () => unsubscribe();
-            }, []);
-
-            // --- FIREBASE ACTIONS ---
-            const handleSignIn = async () => {
-                try {
-                    await auth.signInWithPopup(googleProvider);
-                } catch (error) {
-                    console.error("Error signing in", error);
-                    alert("Error signing in: " + error.message);
-                }
-            };
-
-            const handleSignOut = async () => {
-                try {
-                    await auth.signOut();
-                } catch (error) {
-                    console.error("Error signing out", error);
-                }
-            };
-
-            const saveSurvey = async () => {
-                if (!user) return alert("Please sign in to save surveys.");
-                setIsSaving(true);
-                
-                const surveyData = {
-                    customer,
-                    units,
-                    pricingConfig,
-                    supplies,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    userId: user.uid
-                };
-
-                try {
-                    if (currentSurveyId) {
-                        // Update existing
-                        await db.collection('users').doc(user.uid).collection('surveys').doc(currentSurveyId).update(surveyData);
-                        alert("Survey updated successfully!");
-                    } else {
-                        // Create new
-                        const docRef = await db.collection('users').doc(user.uid).collection('surveys').add({
-                            ...surveyData,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        setCurrentSurveyId(docRef.id);
-                        alert("New survey saved successfully!");
-                    }
-                    fetchSavedSurveys(user.uid);
-                } catch (error) {
-                    console.error("Error saving survey", error);
-                    alert("Error saving: " + error.message);
-                } finally {
-                    setIsSaving(false);
-                }
-            };
-
-            const fetchSavedSurveys = async (uid) => {
-                setIsLoadingData(true);
-                try {
-                    const snapshot = await db.collection('users').doc(uid).collection('surveys').orderBy('updatedAt', 'desc').get();
-                    const surveys = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    setSavedSurveys(surveys);
-                } catch (error) {
-                    console.error("Error fetching surveys", error);
-                } finally {
-                    setIsLoadingData(false);
-                }
-            };
-
-            const loadSurvey = (survey) => {
-                if (confirm("Loading this survey will overwrite your current unsaved changes. Continue?")) {
-                    setCustomer(survey.customer);
-                    setUnits(survey.units || []);
-                    setPricingConfig(survey.pricingConfig);
-                    setSupplies(survey.supplies);
-                    setCurrentSurveyId(survey.id);
-                    setShowLoadModal(false);
-                }
-            };
-
-            const deleteSurvey = async (surveyId, e) => {
-                e.stopPropagation();
-                if (confirm("Are you sure you want to delete this saved survey? This cannot be undone.")) {
-                    try {
-                        await db.collection('users').doc(user.uid).collection('surveys').doc(surveyId).delete();
-                        if (currentSurveyId === surveyId) setCurrentSurveyId(null);
-                        fetchSavedSurveys(user.uid);
-                    } catch (error) {
-                        console.error("Error deleting", error);
-                    }
-                }
-            };
-
-            const startNewSurvey = () => {
-                if (confirm("Start a new survey? Any unsaved changes will be lost.")) {
-                    setCurrentSurveyId(null);
-                    setUnits([]);
-                    setCustomer({
-                        name: '',
-                        address: '',
-                        contactName: '',
-                        phone: '',
-                        email: '',
-                        date: new Date().toISOString().split('T')[0]
-                    });
-                    setSupplies({ coilCleanerQty: 0, rags: 0, grease: 0 });
-                }
-            };
-
-            // --- APP HANDLERS ---
-            const addUnit = () => {
-                const newUnit = {
-                    id: Date.now(),
-                    tag: `RTU-${units.length + 1}`,
-                    brand: '',
-                    model: '',
-                    serial: '',
-                    areaServed: '',
-                    tonnage: 0,
-                    refrigerant: 'R-410A',
-                    driveType: 'Belt',
-                    belts: [{ size: '', qty: 1 }],
-                    filters: [{ size: '', qty: 1, type: 'Pleated' }],
-                    condition: 'Good',
-                    accessNotes: '',
-                    laborMultiplier: 0,
-                    photos: [] 
-                };
-                setUnits([...units, newUnit]);
-            };
-
-            const updateUnit = (id, field, value) => {
-                setUnits(units.map(u => u.id === id ? { ...u, [field]: value } : u));
-            };
-
-            const updateNestedUnit = (unitId, arrayName, index, field, value) => {
-                setUnits(units.map(u => {
-                    if (u.id !== unitId) return u;
-                    const newArray = [...u[arrayName]];
-                    newArray[index] = { ...newArray[index], [field]: value };
-                    return { ...u, [arrayName]: newArray };
-                }));
-            };
-
-            const addItemToUnit = (unitId, arrayName, itemTemplate) => {
-                setUnits(units.map(u => {
-                    if (u.id !== unitId) return u;
-                    return { ...u, [arrayName]: [...u[arrayName], itemTemplate] };
-                }));
-            };
-
-            const removeNestedItem = (unitId, arrayName, index) => {
-                setUnits(units.map(u => {
-                    if (u.id !== unitId) return u;
-                    return { ...u, [arrayName]: u[arrayName].filter((_, i) => i !== index) };
-                }));
-            };
-
-            const deleteUnit = (id) => {
-                if(confirm("Are you sure you want to delete this unit?")) {
-                    setUnits(units.filter(u => u.id !== id));
-                }
-            };
-
-            const handlePhotoUpload = (id, e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setUnits(units.map(u => u.id === id ? { ...u, photos: [...u.photos, reader.result] } : u));
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
-            // --- CALCULATIONS ---
-            const calculateTotals = () => {
-                let totalTonnage = 0;
-                let totalFilters = {};
-                let totalBelts = {};
-                
-                units.forEach(u => {
-                    totalTonnage += parseFloat(u.tonnage) || 0;
-                    u.filters.forEach(f => {
-                        const key = `${f.size} (${f.type})`;
-                        totalFilters[key] = (totalFilters[key] || 0) + parseInt(f.qty || 0);
-                    });
-                    if (u.driveType === 'Belt') {
-                        u.belts.forEach(b => {
-                            const key = b.size;
-                            if(key) totalBelts[key] = (totalBelts[key] || 0) + parseInt(b.qty || 0);
-                        });
-                    }
-                });
-                return { totalTonnage, totalFilters, totalBelts };
-            };
-
-            const calculatePricing = () => {
-                const { totalTonnage } = calculateTotals();
-                const basePM = totalTonnage * pricingConfig.pricePerTon;
-                const chemicalCost = supplies.coilCleanerQty * pricingConfig.coilCleanerCost;
-                const extraLaborHours = units.reduce((acc, u) => acc + (parseFloat(u.laborMultiplier) || 0), 0);
-                const extraLaborCost = extraLaborHours * pricingConfig.laborRate;
-                const estFilterCost = units.reduce((acc, u) => acc + (u.filters.reduce((s, f) => s + f.qty, 0) * 8), 0);
-                const estBeltCost = units.reduce((acc, u) => acc + (u.driveType === 'Belt' ? u.belts.reduce((s, b) => s + b.qty, 0) * 15 : 0), 0);
-                const costPerVisit = basePM + extraLaborCost + chemicalCost + (estFilterCost * pricingConfig.filterMarkup) + (estBeltCost * pricingConfig.beltMarkup) + pricingConfig.tripCharge;
-
-                return {
-                    quarterly: (costPerVisit * 4).toFixed(2),
-                    semiAnnual: (costPerVisit * 2 * 1.05).toFixed(2), 
-                    annual: (costPerVisit * 1.10).toFixed(2),
-                    perVisit: costPerVisit.toFixed(2),
-                    breakdown: { basePM, extraLaborCost, materials: (estFilterCost * pricingConfig.filterMarkup) + (estBeltCost * pricingConfig.beltMarkup) + chemicalCost }
-                };
-            };
-
-            const totals = calculateTotals();
-            const prices = calculatePricing();
-
-            // --- RENDER HELPERS ---
-            const UnitCard = ({ unit }) => {
-                const [expanded, setExpanded] = useState(true);
-
-                return (
-                    <Card className="mb-6 border-l-4 border-l-blue-600">
-                        <div className="p-4 bg-slate-50 border-b flex justify-between items-center cursor-pointer" onClick={() => setExpanded(!expanded)}>
-                            <div className="flex items-center gap-3">
-                                <h3 className="font-bold text-lg text-slate-800">{unit.tag || 'New Unit'}</h3>
-                                <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{unit.tonnage} Ton</span>
-                                {unit.driveType === 'Direct' && <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">Direct Drive</span>}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); deleteUnit(unit.id); }} className="p-2 text-red-500 hover:bg-red-50 rounded"><Icons.Trash2/></button>
-                                {expanded ? <Icons.ChevronUp/> : <Icons.ChevronDown/>}
-                            </div>
-                        </div>
-
-                        {expanded && (
-                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Settings/> Unit Specs</h4>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Brand</label>
-                                            <input type="text" className="w-full p-2 border rounded" placeholder="Carrier..." value={unit.brand} onChange={(e) => updateUnit(unit.id, 'brand', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Model #</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={unit.model} onChange={(e) => updateUnit(unit.id, 'model', e.target.value)} />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-slate-500">Serial #</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={unit.serial} onChange={(e) => updateUnit(unit.id, 'serial', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Tonnage</label>
-                                            <input type="number" className="w-full p-2 border rounded" value={unit.tonnage} onChange={(e) => updateUnit(unit.id, 'tonnage', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Refrigerant</label>
-                                            <select className="w-full p-2 border rounded" value={unit.refrigerant} onChange={(e) => updateUnit(unit.id, 'refrigerant', e.target.value)}>
-                                                <option>R-410A</option>
-                                                <option>R-22</option>
-                                                <option>R-407C</option>
-                                                <option>R-32</option>
-                                                <option>Other</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-slate-500">Area Served</label>
-                                            <input type="text" className="w-full p-2 border rounded" placeholder="e.g. Sales Floor" value={unit.areaServed} onChange={(e) => updateUnit(unit.id, 'areaServed', e.target.value)} />
-                                        </div>
-                                    </div>
-                                    <div className="mt-4">
-                                        <label className="block text-xs font-medium text-slate-500 mb-2">Photos (Nameplate, Issues)</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {unit.photos.map((p, i) => (
-                                                <img key={i} src={p} className="w-16 h-16 object-cover rounded border" alt="Unit" />
-                                            ))}
-                                            <label className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-slate-300 rounded cursor-pointer hover:bg-slate-50">
-                                                <Icons.Camera className="text-slate-400" />
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload(unit.id, e)} />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Wrench/> Drive & Belts</h4>
-                                            <div className="flex text-xs bg-slate-100 rounded p-1">
-                                                <button onClick={() => updateUnit(unit.id, 'driveType', 'Belt')} className={`px-2 py-1 rounded ${unit.driveType === 'Belt' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Belt</button>
-                                                <button onClick={() => updateUnit(unit.id, 'driveType', 'Direct')} className={`px-2 py-1 rounded ${unit.driveType === 'Direct' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Direct</button>
-                                            </div>
-                                        </div>
-                                        {unit.driveType === 'Belt' && (
-                                            <div className="bg-slate-50 p-3 rounded space-y-2">
-                                                {unit.belts.map((belt, idx) => (
-                                                    <div key={idx} className="flex gap-2 items-center">
-                                                        <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={belt.qty} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'qty', e.target.value)} />
-                                                        <input type="text" placeholder="Size (e.g. A42)" className="flex-1 p-1 border rounded text-sm" value={belt.size} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'size', e.target.value)} />
-                                                        {unit.belts.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'belts', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
-                                                    </div>
-                                                ))}
-                                                <button onClick={() => addItemToUnit(unit.id, 'belts', { size: '', qty: 1 })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Belt Size</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.CheckCircle/> Filters</h4>
-                                        <div className="bg-slate-50 p-3 rounded space-y-2">
-                                            {unit.filters.map((filter, idx) => (
-                                                <div key={idx} className="flex gap-2 items-center">
-                                                    <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={filter.qty} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'qty', e.target.value)} />
-                                                    <input type="text" placeholder="Size (e.g. 20x20x2)" className="flex-1 p-1 border rounded text-sm" value={filter.size} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'size', e.target.value)} />
-                                                    {unit.filters.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'filters', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
-                                                </div>
-                                            ))}
-                                            <button onClick={() => addItemToUnit(unit.id, 'filters', { size: '', qty: 1, type: 'Pleated' })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Filter Size</button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.AlertTriangle/> Access & Labor</h4>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-slate-500">Access Notes</label>
-                                                <input type="text" placeholder="Ladder, hatch..." className="w-full p-2 border rounded text-sm" value={unit.accessNotes} onChange={(e) => updateUnit(unit.id, 'accessNotes', e.target.value)} />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs text-slate-500">Extra Hrs</label>
-                                                <input type="number" step="0.5" className="w-full p-2 border rounded text-sm" value={unit.laborMultiplier} onChange={(e) => updateUnit(unit.id, 'laborMultiplier', e.target.value)} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </Card>
-                );
-            };
-
-            // --- PRINT VIEW ---
-            if (showPrintView) {
-                return (
-                    <div className="bg-white min-h-screen text-slate-800 p-8 font-sans max-w-5xl mx-auto">
-                        <div className="fixed top-4 right-4 no-print flex gap-2">
-                            <Button onClick={() => window.print()} variant="primary"><Icons.Printer/> Print/PDF</Button>
-                            <Button onClick={() => setShowPrintView(false)} variant="secondary">Close</Button>
-                        </div>
-                        <div className="border-b-2 border-slate-800 pb-4 mb-8 flex justify-between items-end">
-                            <div>
-                                <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-900">Site Survey & Proposal</h1>
-                                <p className="text-slate-500 mt-1">Commercial HVAC Assessment</p>
-                            </div>
-                            <div className="text-right">
-                                <h2 className="text-xl font-bold">{customer.name}</h2>
-                                <p className="text-sm">{customer.address}</p>
-                                <p className="text-sm">{customer.contactName} | {customer.phone}</p>
-                                <p className="text-sm text-slate-400 mt-2">Date: {customer.date}</p>
-                            </div>
-                        </div>
-                        <div className="mb-8 p-4 bg-slate-50 rounded border border-slate-200">
-                            <h3 className="font-bold text-lg mb-2 border-b pb-1">Executive Summary</h3>
-                            <div className="grid grid-cols-4 gap-4 text-center">
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{units.length}</span><span className="text-xs uppercase text-slate-500">Total Units</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{totals.totalTonnage}</span><span className="text-xs uppercase text-slate-500">Total Tonnage</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{Object.values(totals.totalFilters).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Filters</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{Object.values(totals.totalBelts).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Belts</span></div>
-                            </div>
-                        </div>
-                        <div className="mb-8">
-                            <h3 className="font-bold text-lg mb-4 bg-slate-800 text-white p-2">Unit Inventory</h3>
-                            <table className="w-full text-sm text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b-2 border-slate-300">
-                                        <th className="py-2">Tag</th>
-                                        <th className="py-2">Model/Serial</th>
-                                        <th className="py-2">Area</th>
-                                        <th className="py-2">Filters</th>
-                                        <th className="py-2">Belts</th>
-                                        <th className="py-2">Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {units.map((u, i) => (
-                                        <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 break-inside-avoid">
-                                            <td className="py-3 font-bold align-top">{u.tag}<br/><span className="text-xs font-normal text-slate-500">{u.brand} - {u.tonnage}T</span></td>
-                                            <td className="py-3 align-top"><div className="text-xs">M: {u.model}</div><div className="text-xs text-slate-500">S: {u.serial}</div></td>
-                                            <td className="py-3 align-top">{u.areaServed}</td>
-                                            <td className="py-3 align-top">{u.filters.map((f, fi) => <div key={fi}>{f.qty} x {f.size}</div>)}</td>
-                                            <td className="py-3 align-top">{u.driveType === 'Direct' ? 'Direct Drive' : u.belts.map((b, bi) => <div key={bi}>{b.qty} x {b.size}</div>)}</td>
-                                            <td className="py-3 align-top italic text-slate-500">{u.accessNotes}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div className="grid grid-cols-2 gap-8 mb-8 break-inside-avoid">
-                            <div><h3 className="font-bold text-md mb-2 border-b border-slate-300 pb-1">Required Filters</h3><ul className="text-sm space-y-1">{Object.entries(totals.totalFilters).map(([size, qty]) => (<li key={size} className="flex justify-between border-b border-dashed border-slate-200 py-1"><span>{size}</span><span className="font-bold">{qty}</span></li>))}</ul></div>
-                            <div><h3 className="font-bold text-md mb-2 border-b border-slate-300 pb-1">Required Belts</h3><ul className="text-sm space-y-1">{Object.entries(totals.totalBelts).map(([size, qty]) => (<li key={size} className="flex justify-between border-b border-dashed border-slate-200 py-1"><span>{size}</span><span className="font-bold">{qty}</span></li>))}</ul></div>
-                        </div>
-                        <div className="mt-8 break-inside-avoid">
-                            <h3 className="font-bold text-lg mb-4 bg-slate-800 text-white p-2">Proposed Maintenance Agreements</h3>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Quarterly</h4><div className="text-3xl font-bold text-blue-700">${prices.quarterly}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
-                                <div className="border rounded-lg p-4 text-center border-blue-200 bg-blue-50 shadow-sm relative overflow-hidden"><div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] px-2 py-1">RECOMMENDED</div><h4 className="font-bold text-blue-800 mb-2">Semi-Annual</h4><div className="text-3xl font-bold text-blue-700">${prices.semiAnnual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
-                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Annual</h4><div className="text-3xl font-bold text-blue-700">${prices.annual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
-                            </div>
-                        </div>
-                        {units.some(u => u.photos.length > 0) && (
-                            <div className="mt-12 break-before-page">
-                                <h3 className="font-bold text-lg mb-4 border-b">Site Photos</h3>
-                                <div className="grid grid-cols-3 gap-4">
-                                    {units.map(u => u.photos.map((p, i) => (<div key={`${u.id}-${i}`} className="border rounded p-2"><img src={p} className="w-full h-48 object-cover rounded mb-2" /><p className="text-xs font-bold text-center">{u.tag} - {u.model}</p></div>)))}
-                                </div>
-                            </div>
-                        )}
+            <!-- Auth Status -->
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                <template x-if="!user">
+                    <button @click="signIn" class="flex items-center px-4 py-2 bg-sky-600 text-white font-medium rounded-lg shadow hover:bg-sky-700 transition">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                        Sign in with Google
+                    </button>
+                </template>
+                <template x-if="user">
+                    <div class="flex items-center bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-xs font-medium text-green-800" x-text="user.email"></span>
                     </div>
-                );
-            }
+                </template>
+            </div>
+        </div>
 
-            // --- MAIN UI ---
-            return (
-                <div>
-                    <nav className="bg-slate-800 text-white p-4 sticky top-0 z-10 shadow-lg no-print">
-                        <div className="max-w-4xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-2"><Icons.Calculator className="text-blue-400" /><h1 className="font-bold text-lg tracking-tight hidden sm:block">HVAC<span className="text-blue-400">Pro</span> Survey</h1></div>
-                            <div className="flex items-center gap-2">
-                                {!user ? (
-                                    <Button onClick={handleSignIn} variant="google" className="text-xs sm:text-sm py-1"><Icons.LogIn/> Sign In</Button>
-                                ) : (
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-end mr-2"><span className="text-xs text-blue-200 font-bold">{user.displayName || user.email}</span><button onClick={handleSignOut} className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1"><Icons.LogOut/> Sign Out</button></div>
-                                        {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-slate-600" />}
-                                        <div className="h-6 w-px bg-slate-600 mx-1"></div>
-                                        <Button variant="success" onClick={saveSurvey} disabled={isSaving} className="text-xs sm:text-sm py-1">{isSaving ? <Icons.Loader className="animate-spin"/> : <Icons.Cloud/>} <span className="hidden sm:inline">Save</span></Button>
-                                        <Button variant="secondary" onClick={() => setShowLoadModal(true)} className="text-xs sm:text-sm py-1 bg-slate-700 text-white border-none hover:bg-slate-600"><Icons.Download/> <span className="hidden sm:inline">Load</span></Button>
-                                        <div className="h-6 w-px bg-slate-600 mx-1"></div>
-                                        <Button variant="primary" onClick={startNewSurvey} className="text-xs sm:text-sm py-1 bg-slate-700 hover:bg-slate-600 border-none"><Icons.Plus/> <span className="hidden sm:inline">New</span></Button>
-                                    </div>
-                                )}
-                                <div className="ml-2"><Button variant="primary" onClick={() => setShowPrintView(true)} className="text-xs sm:text-sm py-1"><Icons.FileText/> Report</Button></div>
+        <!-- AUTH LOCK OVERLAY -->
+        <div x-show="!user" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r shadow-sm">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        You are in <strong>Read-Only Mode</strong>. Sign in to Save/Load surveys.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN FORM GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- LEFT COLUMN: Inputs -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- SECTION 1: Site Information (Clean Layout) -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+                    <h2 class="text-lg font-bold text-gray-800 border-b pb-2 flex items-center">
+                        <span class="bg-sky-100 text-sky-600 w-6 h-6 rounded flex items-center justify-center text-xs mr-2">1</span>
+                        Job Information
+                    </h2>
+                    
+                    <!-- Row 1: Primary Identifiers -->
+                    <!-- Added .debounce to prevent focus jumping -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="label-std">Job #</label><input x-model.debounce.500ms="data.jobNo" type="text" class="input-std" placeholder="---"></div>
+                        <div><label class="label-std">Date</label><input x-model="data.date" type="date" class="input-std"></div>
+                        <div><label class="label-std">WO #</label><input x-model.debounce.500ms="data.woNo" type="text" class="input-std" placeholder="---"></div>
+                    </div>
+
+                    <!-- Row 2: Job Type Checkboxes -->
+                    <div>
+                        <label class="label-std mb-2">Job Type</label>
+                        <div class="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-sky-600">
+                                <input type="checkbox" x-model="data.jobTypes.serviceCall" class="text-sky-600 rounded border-gray-300 focus:ring-sky-500">
+                                <span>Service Call</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-sky-600">
+                                <input type="checkbox" x-model="data.jobTypes.plannedMaintenance" class="text-sky-600 rounded border-gray-300 focus:ring-sky-500">
+                                <span>Planned Maint.</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-sky-600">
+                                <input type="checkbox" x-model="data.jobTypes.emergency" class="text-sky-600 rounded border-gray-300 focus:ring-sky-500">
+                                <span>Emergency</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-sky-600">
+                                <input type="checkbox" x-model="data.jobTypes.regular" class="text-sky-600 rounded border-gray-300 focus:ring-sky-500">
+                                <span>Regular</span>
+                            </label>
+                            <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer hover:text-sky-600">
+                                <input type="checkbox" x-model="data.jobTypes.warranty" class="text-sky-600 rounded border-gray-300 focus:ring-sky-500">
+                                <span>Warranty</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Info Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Left Sub-Column: Customer Info -->
+                        <div class="space-y-4">
+                            <div><label class="label-std">Customer (Bill To)</label><input x-model.debounce.500ms="data.customerName" type="text" class="input-std"></div>
+                            <div><label class="label-std">Billing Address</label><textarea x-model.debounce.500ms="data.billingAddress" rows="3" class="input-std"></textarea></div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="label-std">Phone</label><input x-model.debounce.500ms="data.contactPhone" type="tel" class="input-std"></div>
+                                <div><label class="label-std">Cell</label><input x-model.debounce.500ms="data.contactCell" type="tel" class="input-std"></div>
                             </div>
+                            <div><label class="label-std">Email</label><input x-model.debounce.500ms="data.contactEmail" type="email" class="input-std"></div>
                         </div>
-                    </nav>
 
-                    {showLoadModal && (
-                        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-                            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
-                                <div className="p-4 border-b flex justify-between items-center bg-slate-50"><h3 className="font-bold text-lg">Load Saved Survey</h3><button onClick={() => setShowLoadModal(false)} className="text-slate-400 hover:text-slate-600">✕</button></div>
-                                <div className="p-4 overflow-y-auto flex-1">
-                                    {isLoadingData ? <div className="flex justify-center p-8"><Icons.Loader className="animate-spin text-blue-600"/></div> : savedSurveys.length === 0 ? <p className="text-center text-slate-400 py-8">No saved surveys found.</p> : (
-                                        <div className="space-y-2">
-                                            {savedSurveys.map(survey => (
-                                                <div key={survey.id} onClick={() => loadSurvey(survey)} className="border p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors flex justify-between items-center group">
-                                                    <div><div className="font-bold text-slate-800">{survey.customer.name || 'Untitled Survey'}</div><div className="text-xs text-slate-500">{survey.units?.length || 0} Units • Updated: {new Date(survey.updatedAt?.seconds * 1000).toLocaleDateString()}</div></div>
-                                                    <button onClick={(e) => deleteSurvey(survey.id, e)} className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Icons.Trash2/></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                        <!-- Right Sub-Column: Work Info -->
+                        <div class="space-y-4">
+                            <div><label class="label-std">Complaint / Request / Access</label><textarea x-model.debounce.500ms="data.locationNotes" rows="3" class="input-std" placeholder="Door codes, specific issues, etc."></textarea></div>
+                            <div><label class="label-std">Work Ordered By</label><input x-model.debounce.500ms="data.workOrderedBy" type="text" class="input-std"></div>
+                            <div><label class="label-std">Address of Unit</label><input x-model.debounce.500ms="data.serviceAddress" type="text" class="input-std"></div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="label-std">Site Name / View Ref</label><input x-model.debounce.500ms="data.siteName" type="text" class="input-std"></div>
+                                <div>
+                                    <label class="label-std">Roof Access</label>
+                                    <select x-model="data.roofAccess" class="input-std">
+                                        <option>Yes</option>
+                                        <option>Ladder Req.</option>
+                                        <option>No</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
-                    )}
-
-                    <div className="max-w-4xl mx-auto p-4">
-                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-print">
-                            {[{ id: 'customer', label: 'Customer', icon: Icons.Users }, { id: 'units', label: 'Units', icon: Icons.Settings }, { id: 'supplies', label: 'Supplies', icon: Icons.Wrench }, { id: 'totals', label: 'Totals & Price', icon: Icons.Calculator }].map(tab => (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:bg-white/50'}`}><tab.icon /> {tab.label}</button>
-                            ))}
-                        </div>
-
-                        <div className="space-y-6">
-                            {activeTab === 'customer' && (
-                                <Card className="p-6">
-                                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Icons.Users className="text-blue-600"/> Customer Details</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Company / Building</label><input type="text" className="w-full p-2 border rounded" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} placeholder="e.g. Skyline Plaza" /></div>
-                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Address</label><input type="text" className="w-full p-2 border rounded" value={customer.address} onChange={e => setCustomer({...customer, address: e.target.value})} placeholder="1234 Airflow Lane" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Contact Name</label><input type="text" className="w-full p-2 border rounded" value={customer.contactName} onChange={e => setCustomer({...customer, contactName: e.target.value})} placeholder="John Doe" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Phone</label><input type="tel" className="w-full p-2 border rounded" value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} placeholder="(555) 123-4567" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Email</label><input type="email" className="w-full p-2 border rounded" value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} placeholder="john@example.com" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Survey Date</label><input type="date" className="w-full p-2 border rounded" value={customer.date} onChange={e => setCustomer({...customer, date: e.target.value})} /></div>
-                                    </div>
-                                    <div className="mt-6 flex justify-end"><Button onClick={() => setActiveTab('units')}>Next: Add Units &rarr;</Button></div>
-                                </Card>
-                            )}
-
-                            {activeTab === 'units' && (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center mb-2"><h2 className="text-xl font-bold text-slate-700">Unit Inventory ({units.length})</h2><Button onClick={addUnit} variant="primary"><Icons.Plus/> Add Unit</Button></div>
-                                    {units.length === 0 && <div className="text-center p-12 bg-white rounded-lg border-2 border-dashed border-slate-300 text-slate-400"><Icons.Settings className="mx-auto mb-2 opacity-50"/><p>No units added yet. Tap "Add Unit" to begin.</p></div>}
-                                    {units.map((unit) => <UnitCard key={unit.id} unit={unit} />)}
-                                    {units.length > 0 && <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('customer')}>&larr; Back</Button><Button onClick={() => setActiveTab('supplies')}>Next: Supplies &rarr;</Button></div>}
-                                </div>
-                            )}
-
-                            {activeTab === 'supplies' && (
-                                <div className="space-y-6">
-                                    <Card className="p-6">
-                                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Icons.Wrench/> Bulk Supplies Calculator</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-slate-50 p-4 rounded border"><label className="block text-sm font-semibold mb-2">Coil Cleaner (Gallons)</label><div className="flex items-center gap-2"><input type="number" className="p-2 border rounded w-24" value={supplies.coilCleanerQty} onChange={(e) => setSupplies({...supplies, coilCleanerQty: Number(e.target.value)})} /><span className="text-sm text-slate-500">x ${pricingConfig.coilCleanerCost}/gal = <span className="font-bold text-slate-800">${(supplies.coilCleanerQty * pricingConfig.coilCleanerCost).toFixed(2)}</span></span></div></div></div>
-                                    </Card>
-                                    <Card className="p-6 border-orange-200">
-                                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-700"><Icons.Settings/> Pricing Configuration</h2>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                            <div><label className="block text-xs font-bold text-slate-500 uppercase">Price Per Ton</label><input type="number" className="w-full p-2 border rounded" value={pricingConfig.pricePerTon} onChange={(e) => setPricingConfig({...pricingConfig, pricePerTon: Number(e.target.value)})} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-500 uppercase">Labor Rate / Hr</label><input type="number" className="w-full p-2 border rounded" value={pricingConfig.laborRate} onChange={(e) => setPricingConfig({...pricingConfig, laborRate: Number(e.target.value)})} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-500 uppercase">Trip Charge</label><input type="number" className="w-full p-2 border rounded" value={pricingConfig.tripCharge} onChange={(e) => setPricingConfig({...pricingConfig, tripCharge: Number(e.target.value)})} /></div>
-                                        </div>
-                                    </Card>
-                                    <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('units')}>&larr; Back</Button><Button onClick={() => setActiveTab('totals')}>Next: Totals &rarr;</Button></div>
-                                </div>
-                            )}
-
-                            {activeTab === 'totals' && (
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Total Filters Needed</h3>{Object.keys(totals.totalFilters).length === 0 ? <p className="text-slate-400 italic">No filters recorded.</p> : <ul className="space-y-2">{Object.entries(totals.totalFilters).map(([size, qty]) => <li key={size} className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">{size}</span><span className="font-bold bg-blue-100 text-blue-800 px-2 rounded-full">{qty}</span></li>)}</ul>}</Card>
-                                        <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Total Belts Needed</h3>{Object.keys(totals.totalBelts).length === 0 ? <p className="text-slate-400 italic">No belts recorded.</p> : <ul className="space-y-2">{Object.entries(totals.totalBelts).map(([size, qty]) => <li key={size} className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">{size}</span><span className="font-bold bg-orange-100 text-orange-800 px-2 rounded-full">{qty}</span></li>)}</ul>}</Card>
-                                    </div>
-                                    <Card className="p-6 bg-slate-800 text-white">
-                                        <h2 className="text-xl font-bold mb-6">Estimated Maintenance Costs</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Quarterly (4x)</div><div className="text-3xl font-bold text-green-400">${prices.quarterly}</div></div>
-                                            <div className="bg-slate-700 p-4 rounded-lg border-2 border-blue-500 relative"><div className="absolute top-0 right-0 bg-blue-500 text-xs px-2 py-0.5">Popular</div><div className="text-sm text-slate-300 mb-1">Semi-Annual (2x)</div><div className="text-3xl font-bold text-green-400">${prices.semiAnnual}</div></div>
-                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Annual (1x)</div><div className="text-3xl font-bold text-green-400">${prices.annual}</div></div>
-                                        </div>
-                                    </Card>
-                                    <div className="flex justify-center mt-8 pb-8"><Button onClick={() => setShowPrintView(true)} variant="success" className="px-8 py-4 text-lg shadow-xl"><Icons.FileText/> Generate Report & Proposal</Button></div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
-            );
-        }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<HVACSurveyApp />);
+
+                <!-- SECTION 2: Equipment List -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-xl font-bold text-gray-800">Equipment List</h2>
+                        <button @click="addUnit()" class="bg-sky-600 hover:bg-sky-700 text-white text-sm px-4 py-2 rounded-lg shadow flex items-center transition">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add Unit
+                        </button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <template x-if="data.units.length === 0">
+                        <div class="text-center p-10 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl text-gray-500">
+                            No units added yet. Click "Add Unit" to start.
+                        </div>
+                    </template>
+
+                    <!-- UNIT CARDS -->
+                    <template x-for="(unit, index) in data.units" :key="unit.id">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition hover:shadow-md">
+                            <div class="bg-gray-50 p-4 border-b flex justify-between items-center cursor-pointer" @click="unit.expanded = !unit.expanded">
+                                <div class="flex items-center">
+                                    <div class="bg-sky-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3" x-text="index + 1"></div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800" x-text="unit.brand ? (unit.brand + ' ' + unit.type) : 'New Unit'"></h3>
+                                        <p class="text-xs text-gray-500" x-text="unit.model ? 'Model: ' + unit.model : 'No Model Info'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-green-600 font-bold text-sm" x-text="'$' + calculateUnitTotal(unit).toFixed(2)"></span>
+                                    <button @click.stop="removeUnit(index)" class="text-red-400 hover:text-red-600 p-1">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{'rotate-180': unit.expanded}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+
+                            <!-- Unit Body -->
+                            <div x-show="unit.expanded" class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white">
+                                <!-- Debounced inputs to prevent header flickering focus loss -->
+                                <div><label class="label-std">Type</label>
+                                    <select x-model="unit.type" class="input-std">
+                                        <option value="RTU">RTU</option>
+                                        <option value="Split System">Split System</option>
+                                        <option value="Condenser">Condenser</option>
+                                        <option value="VAV">VAV</option>
+                                    </select>
+                                </div>
+                                <div><label class="label-std">Brand</label><input x-model.debounce.500ms="unit.brand" type="text" class="input-std"></div>
+                                <div><label class="label-std">Model</label><input x-model.debounce.500ms="unit.model" type="text" class="input-std"></div>
+                                <div><label class="label-std">Serial</label><input x-model.debounce.500ms="unit.serialNumber" type="text" class="input-std"></div>
+                                <div><label class="label-std">Tonnage</label><input x-model.debounce.500ms="unit.tonnage" type="number" class="input-std" placeholder="e.g. 5"></div>
+                                <div><label class="label-std">VAV Count</label><input x-model.number.debounce.300ms="unit.vavCount" type="number" class="input-std"></div>
+
+                                <!-- Filters & Belts -->
+                                <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b py-4 my-2">
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <div class="flex justify-between mb-2">
+                                            <label class="label-std mb-0">Filters</label>
+                                            <button @click="unit.filters.push({qty:1, size:''})" class="text-xs text-sky-600 font-bold">+ Add Filter</button>
+                                        </div>
+                                        <template x-for="(filter, fIndex) in unit.filters" :key="fIndex">
+                                            <div class="flex gap-2 mb-2">
+                                                <input x-model="filter.qty" type="number" class="w-16 rounded border-gray-300 text-sm" placeholder="#">
+                                                <input x-model.debounce.500ms="filter.size" type="text" class="flex-1 rounded border-gray-300 text-sm" placeholder="Size (e.g. 16x25x2)">
+                                                <button @click="unit.filters.splice(fIndex, 1)" class="text-red-500 hover:text-red-700">x</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <div class="flex justify-between mb-2">
+                                            <label class="label-std mb-0">Belts</label>
+                                            <button @click="unit.belts.push({qty:1, size:''})" class="text-xs text-sky-600 font-bold">+ Add Belt</button>
+                                        </div>
+                                        <template x-for="(belt, bIndex) in unit.belts" :key="bIndex">
+                                            <div class="flex gap-2 mb-2">
+                                                <input x-model="belt.qty" type="number" class="w-16 rounded border-gray-300 text-sm" placeholder="#">
+                                                <input x-model.debounce.500ms="belt.size" type="text" class="flex-1 rounded border-gray-300 text-sm" placeholder="Size (e.g. A45)">
+                                                <button @click="unit.belts.splice(bIndex, 1)" class="text-red-500 hover:text-red-700">x</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Pricing Fields (Debounced to stop calculator jumping) -->
+                                <div class="md:col-span-3 bg-yellow-50 p-3 rounded border border-yellow-200 grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                                    <div><label class="label-std">Base PM ($)</label><input x-model.number.debounce.300ms="unit.basePMCost" type="number" class="input-std"></div>
+                                    <div><label class="label-std">Cleaner Mat ($)</label><input x-model.number.debounce.300ms="unit.coilCleanerMaterial" type="number" class="input-std"></div>
+                                    <div><label class="label-std">Extra Mat ($)</label><input x-model.number.debounce.300ms="unit.additionalMaterial" type="number" class="input-std"></div>
+                                    <div class="flex items-center h-10">
+                                        <input x-model="unit.requiresCoilClean" type="checkbox" class="h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
+                                        <label class="ml-2 block text-sm text-gray-900">Needs Coil Wash</label>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="label-std">Technician Notes</label>
+                                    <textarea x-model.debounce.500ms="unit.notes" rows="2" class="input-std" placeholder="Condition, access issues, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Sticky Summary -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-6 space-y-4">
+                    <!-- Cost Summary Card -->
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-800 p-4">
+                            <h3 class="text-white font-bold text-lg">Quote Summary</h3>
+                            <p class="text-gray-400 text-xs">Based on current inputs</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-gray-600 font-medium">Cost Per Visit</span>
+                                <span class="text-3xl font-extrabold text-sky-600" x-text="formatCurrency(grandTotal)"></span>
+                            </div>
+                            <div class="text-xs text-gray-500 mb-6 border-b pb-4">
+                                Includes Base Trip ($430), Unit PMs, VAVs ($15ea), and Materials.
+                            </div>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span>Annual (1x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal)"></span></div>
+                                <div class="flex justify-between"><span>Semi-Annual (2x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal * 2)"></span></div>
+                                <div class="flex justify-between"><span>Quarterly (4x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal * 4)"></span></div>
+                            </div>
+                        </div>
+                        <!-- Detailed Breakdown Toggle -->
+                        <div class="bg-gray-50 p-4 border-t cursor-pointer" @click="showBreakdown = !showBreakdown">
+                            <div class="flex justify-between text-xs font-bold text-gray-500 uppercase">
+                                <span>Detailed Breakdown</span>
+                                <span x-text="showBreakdown ? '-' : '+'"></span>
+                            </div>
+                            <div x-show="showBreakdown" class="mt-3 space-y-1 text-xs text-gray-600" x-transition>
+                                <div class="flex justify-between"><span>Base Labor:</span> <span>$430.00</span></div>
+                                <div class="flex justify-between"><span>Unit PM Sum:</span> <span x-text="formatCurrency(totals.unitPM)"></span></div>
+                                <div class="flex justify-between"><span>VAV Add-on:</span> <span x-text="formatCurrency(totals.vav)"></span></div>
+                                <div class="flex justify-between"><span>Coil Labor:</span> <span x-text="formatCurrency(totals.coilLabor)"></span></div>
+                                <div class="flex justify-between"><span>Materials:</span> <span x-text="formatCurrency(totals.materials)"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="saveSurvey" :disabled="!user || isSaving" class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg shadow transition flex justify-center items-center">
+                            <span x-show="isSaving" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                            Save
+                        </button>
+                        <button @click="fetchSurveys" :disabled="!user" class="bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg shadow-sm transition">
+                            Load
+                        </button>
+                        <button @click="resetForm" class="col-span-2 text-xs text-gray-500 hover:text-red-500 underline">Start New / Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOAD MODAL -->
+        <div x-show="showLoadModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showLoadModal = false"></div>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Saved Surveys</h3>
+                        <div class="mt-4 max-h-60 overflow-y-auto space-y-2">
+                            <template x-if="savedSurveys.length === 0"><p class="text-gray-500">No saved surveys found.</p></template>
+                            <template x-for="survey in savedSurveys" :key="survey.id">
+                                <div @click="loadSurvey(survey)" class="p-3 border rounded hover:bg-sky-50 cursor-pointer flex justify-between items-center group">
+                                    <div>
+                                        <div class="font-bold text-gray-700" x-text="survey.siteName || 'Unnamed'"></div>
+                                        <div class="text-xs text-gray-500" x-text="new Date(survey.lastUpdated.seconds * 1000).toLocaleDateString()"></div>
+                                    </div>
+                                    <button class="text-sky-600 text-sm font-bold opacity-0 group-hover:opacity-100">Load</button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="showLoadModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div x-show="toast.visible" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed bottom-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50"
+             :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
+             x-text="toast.message"
+             style="display: none;">
+        </div>
+
+    </div>
+
+    <!-- MAIN APP SCRIPT -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('hvacApp', () => ({
+                user: null,
+                isSaving: false,
+                showLoadModal: false,
+                showBreakdown: false,
+                currentDocId: null,
+                savedSurveys: [],
+                toast: { visible: false, message: '', type: 'success' },
+                auth: null,
+                db: null,
+                firebaseConfig: null,
+
+                data: {
+                    jobNo: '',
+                    date: new Date().toISOString().split('T')[0],
+                    woNo: '',
+                    companyName: 'Mechanical Temp',
+                    viewRef: '',
+                    customerName: '',
+                    billingAddress: '',
+                    contactPhone: '',
+                    contactCell: '',
+                    contactEmail: '',
+                    workOrderedBy: '',
+                    serviceAddress: '',
+                    siteName: '',
+                    roofAccess: 'Yes',
+                    locationNotes: '',
+                    jobTypes: {
+                        serviceCall: false,
+                        plannedMaintenance: false,
+                        emergency: false,
+                        regular: true,
+                        warranty: false
+                    },
+                    units: []
+                },
+
+                async init() {
+                    console.log("App initializing...");
+                    if(this.data.units.length === 0) this.addUnit();
+
+                    try {
+                        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                        const { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithCustomToken } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                        const { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+                        this.fb = { signInWithPopup, GoogleAuthProvider, getAuth, getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp };
+
+                        this.firebaseConfig = {
+                            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
+                            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
+                            projectId: "hvac-site-survey-quoting-tool",
+                            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
+                            messagingSenderId: "228511119722",
+                            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13"
+                        };
+
+                         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                            try {
+                                const envConfig = JSON.parse(__firebase_config);
+                                this.firebaseConfig = envConfig;
+                                this.appIdStr = typeof __app_id !== 'undefined' ? __app_id : this.firebaseConfig.appId;
+                            } catch(e) { console.error("Env config parse error", e); }
+                        } else {
+                            this.appIdStr = "default-app-id"; 
+                        }
+
+                        const app = initializeApp(this.firebaseConfig);
+                        this.auth = getAuth(app);
+                        this.db = getFirestore(app);
+
+                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(this.auth, initialAuthToken);
+                        }
+
+                        onAuthStateChanged(this.auth, (u) => {
+                            this.user = u;
+                            if(u && !u.isAnonymous) {
+                                this.fetchSurveys();
+                            }
+                        });
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                        this.showToast("Failed to load database connection.", "error");
+                    }
+                },
+
+                async signIn() {
+                    if (!this.auth) return;
+                    try {
+                        const provider = new this.fb.GoogleAuthProvider();
+                        await this.fb.signInWithPopup(this.auth, provider);
+                    } catch (e) {
+                        this.showToast(e.message, 'error');
+                    }
+                },
+
+                addUnit() {
+                    this.data.units.push({
+                        id: Date.now(),
+                        expanded: true,
+                        type: 'RTU',
+                        brand: '',
+                        model: '',
+                        serialNumber: '',
+                        tonnage: null,
+                        vavCount: 0,
+                        filters: [{qty:1, size:''}],
+                        belts: [{qty:1, size:''}],
+                        basePMCost: 0,
+                        coilCleanerMaterial: 0,
+                        additionalMaterial: 0,
+                        requiresCoilClean: false,
+                        notes: ''
+                    });
+                },
+
+                removeUnit(index) {
+                    if(confirm("Delete this unit?")) {
+                        this.data.units.splice(index, 1);
+                    }
+                },
+
+                resetForm() {
+                    if(confirm("Clear current form? Unsaved changes will be lost.")) {
+                        this.currentDocId = null;
+                        this.data.jobNo = '';
+                        this.data.woNo = '';
+                        this.data.companyName = 'Mechanical Temp';
+                        this.data.customerName = '';
+                        this.data.billingAddress = '';
+                        this.data.contactPhone = '';
+                        this.data.contactCell = '';
+                        this.data.contactEmail = '';
+                        this.data.serviceAddress = '';
+                        this.data.siteName = '';
+                        this.data.locationNotes = '';
+                        this.data.workOrderedBy = '';
+                        this.data.units = [];
+                        this.addUnit();
+                    }
+                },
+
+                calculateUnitTotal(unit) {
+                    let cost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
+                    cost += (unit.vavCount || 0) * 15;
+                    if (unit.requiresCoilClean) {
+                        let ton = parseFloat(unit.tonnage) || 0;
+                        cost += (ton >= 10 ? 60 : 45);
+                    }
+                    return cost;
+                },
+
+                get totals() {
+                    let t = { unitPM: 0, vav: 0, coilLabor: 0, materials: 0 };
+                    this.data.units.forEach(u => {
+                        t.unitPM += (u.basePMCost || 0);
+                        t.vav += (u.vavCount || 0) * 15;
+                        t.materials += (u.coilCleanerMaterial || 0) + (u.additionalMaterial || 0);
+                        if(u.requiresCoilClean) {
+                            let ton = parseFloat(u.tonnage) || 0;
+                            t.coilLabor += (ton >= 10 ? 60 : 45);
+                        }
+                    });
+                    return t;
+                },
+
+                get grandTotal() {
+                    const baseTrip = 430;
+                    return baseTrip + this.totals.unitPM + this.totals.vav + this.totals.coilLabor + this.totals.materials;
+                },
+
+                formatCurrency(val) {
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
+                },
+
+                async saveSurvey() {
+                    if(!this.user) return this.showToast("Please sign in first.", 'error');
+                    if(!this.data.siteName) return this.showToast("Site Name is required", 'error');
+                    
+                    this.isSaving = true;
+                    try {
+                        if (!this.currentDocId) this.currentDocId = `survey-${Date.now()}`;
+                        let path = `artifacts/${this.appIdStr}/users/${this.user.uid}/hvac_surveys`;
+                        
+                        const dataToSave = {
+                            ...this.data,
+                            lastUpdated: this.fb.serverTimestamp()
+                        };
+
+                        const docRef = this.fb.doc(this.db, path, this.currentDocId);
+                        await this.fb.setDoc(docRef, dataToSave, { merge: true });
+
+                        this.showToast("Saved Successfully!");
+                    } catch (e) {
+                        console.error(e);
+                        this.showToast("Error saving data: " + e.message, 'error');
+                    } finally {
+                        this.isSaving = false;
+                    }
+                },
+
+                async fetchSurveys() {
+                    if (!this.user || !this.db) return;
+                    try {
+                        let path = `artifacts/${this.appIdStr}/users/${this.user.uid}/hvac_surveys`;
+                        const q = this.fb.query(this.fb.collection(this.db, path), this.fb.orderBy('lastUpdated', 'desc'), this.fb.limit(10));
+                        const querySnapshot = await this.fb.getDocs(q);
+                        this.savedSurveys = [];
+                        querySnapshot.forEach((doc) => {
+                            this.savedSurveys.push({ id: doc.id, ...doc.data() });
+                        });
+                        if(this.savedSurveys.length > 0) this.showLoadModal = true;
+                        else this.showToast("No saved surveys found.", "error");
+                    } catch (e) {
+                        console.error(e);
+                        this.showToast("Error fetching surveys", 'error');
+                    }
+                },
+
+                loadSurvey(survey) {
+                    this.currentDocId = survey.id;
+                    let loadedData = JSON.parse(JSON.stringify(survey));
+                    delete loadedData.id;
+                    delete loadedData.lastUpdated;
+                    
+                    // Backward compatibility defaults
+                    if(!loadedData.jobTypes) loadedData.jobTypes = { regular: true };
+                    if(!loadedData.units) loadedData.units = [];
+                    loadedData.units = loadedData.units.map(u => ({...u, expanded: false}));
+
+                    this.data = loadedData;
+                    this.showLoadModal = false;
+                    this.showToast("Survey Loaded");
+                },
+
+                showToast(msg, type = 'success') {
+                    this.toast.message = msg;
+                    this.toast.type = type;
+                    this.toast.visible = true;
+                    setTimeout(() => this.toast.visible = false, 3000);
+                }
+            }))
+        });
     </script>
 </body>
 </html>

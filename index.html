@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HVAC Site Survey Tool</title>
+    
+    <!-- Tailwind CSS (CDN is required for this standalone single-file tool) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    <!-- Alpine.js -->
+    <!-- We load Alpine deferred so it initializes after our script registers the data component -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; background-color: #f3f4f6; }
@@ -15,16 +20,19 @@
     </style>
 </head>
 
-<body class="p-4 md:p-8" x-data="hvacApp()" x-cloak>
+<!-- We initialize the app here. x-cloak prevents flash of unstyled content -->
+<body class="p-4 md:p-8" x-data="hvacApp" x-cloak>
 
     <div class="max-w-5xl mx-auto pb-20">
         
+        <!-- HEADER -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 bg-white p-6 rounded-xl shadow-sm">
             <div>
                 <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">HVAC Site Survey</h1>
                 <p class="text-sm text-gray-500 mt-1">Commercial Estimation & Asset Tagging</p>
             </div>
             
+            <!-- Auth Status -->
             <div class="mt-4 md:mt-0 flex items-center space-x-3">
                 <template x-if="!user">
                     <button @click="signIn" class="flex items-center px-4 py-2 bg-sky-600 text-white font-medium rounded-lg shadow hover:bg-sky-700 transition">
@@ -41,6 +49,7 @@
             </div>
         </div>
 
+        <!-- AUTH LOCK OVERLAY (If not logged in) -->
         <div x-show="!user" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r shadow-sm">
             <div class="flex">
                 <div class="ml-3">
@@ -51,10 +60,13 @@
             </div>
         </div>
 
+        <!-- MAIN FORM GRID -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+            <!-- LEFT COLUMN: Inputs -->
             <div class="lg:col-span-2 space-y-6">
 
+                <!-- SECTION 1: Site Information -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2 flex items-center">
                         <span class="bg-sky-100 text-sky-600 w-6 h-6 rounded flex items-center justify-center text-xs mr-2">1</span>
@@ -79,6 +91,7 @@
                     </div>
                 </div>
 
+                <!-- SECTION 2: Equipment List -->
                 <div class="space-y-4">
                     <div class="flex justify-between items-end">
                         <h2 class="text-xl font-bold text-gray-800">Equipment List</h2>
@@ -88,20 +101,23 @@
                         </button>
                     </div>
 
+                    <!-- Empty State -->
                     <template x-if="data.units.length === 0">
                         <div class="text-center p-10 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl text-gray-500">
                             No units added yet. Click "Add Unit" to start.
                         </div>
                     </template>
 
+                    <!-- UNIT CARDS (Reactive Loop) -->
                     <template x-for="(unit, index) in data.units" :key="unit.id">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition hover:shadow-md">
                             
+                            <!-- Unit Header -->
                             <div class="bg-gray-50 p-4 border-b flex justify-between items-center cursor-pointer" @click="unit.expanded = !unit.expanded">
                                 <div class="flex items-center">
                                     <div class="bg-sky-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3" x-text="index + 1"></div>
                                     <div>
-                                        <h3 class="font-bold text-gray-800" x-text="unit.brand + ' ' + unit.type"></h3>
+                                        <h3 class="font-bold text-gray-800" x-text="unit.brand ? (unit.brand + ' ' + unit.type) : 'New Unit'"></h3>
                                         <p class="text-xs text-gray-500" x-text="unit.model ? 'Model: ' + unit.model : 'No Model Info'"></p>
                                     </div>
                                 </div>
@@ -110,11 +126,14 @@
                                     <button @click.stop="removeUnit(index)" class="text-red-400 hover:text-red-600 p-1">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
+                                    <!-- Chevron -->
                                     <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{'rotate-180': unit.expanded}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
 
+                            <!-- Unit Body -->
                             <div x-show="unit.expanded" class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white">
+                                <!-- Row 1 -->
                                 <div><label class="label-std">Type</label>
                                     <select x-model="unit.type" class="input-std">
                                         <option value="RTU">RTU</option>
@@ -126,11 +145,14 @@
                                 <div><label class="label-std">Brand</label><input x-model="unit.brand" type="text" class="input-std"></div>
                                 <div><label class="label-std">Model</label><input x-model="unit.model" type="text" class="input-std"></div>
                                 
+                                <!-- Row 2 -->
                                 <div><label class="label-std">Serial</label><input x-model="unit.serialNumber" type="text" class="input-std"></div>
                                 <div><label class="label-std">Tonnage</label><input x-model="unit.tonnage" type="number" class="input-std" placeholder="e.g. 5"></div>
                                 <div><label class="label-std">VAV Count</label><input x-model.number="unit.vavCount" type="number" class="input-std"></div>
 
+                                <!-- Filters & Belts Section -->
                                 <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b py-4 my-2">
+                                    <!-- Filters -->
                                     <div class="bg-gray-50 p-3 rounded">
                                         <div class="flex justify-between mb-2">
                                             <label class="label-std mb-0">Filters</label>
@@ -144,6 +166,7 @@
                                             </div>
                                         </template>
                                     </div>
+                                    <!-- Belts -->
                                     <div class="bg-gray-50 p-3 rounded">
                                         <div class="flex justify-between mb-2">
                                             <label class="label-std mb-0">Belts</label>
@@ -159,6 +182,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Pricing Fields -->
                                 <div class="md:col-span-3 bg-yellow-50 p-3 rounded border border-yellow-200 grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
                                     <div><label class="label-std">Base PM ($)</label><input x-model.number="unit.basePMCost" type="number" class="input-std"></div>
                                     <div><label class="label-std">Cleaner Mat ($)</label><input x-model.number="unit.coilCleanerMaterial" type="number" class="input-std"></div>
@@ -179,9 +203,11 @@
                 </div>
             </div>
 
+            <!-- RIGHT COLUMN: Sticky Summary -->
             <div class="lg:col-span-1">
                 <div class="sticky top-6 space-y-4">
                     
+                    <!-- Cost Summary Card -->
                     <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                         <div class="bg-gray-800 p-4">
                             <h3 class="text-white font-bold text-lg">Quote Summary</h3>
@@ -202,6 +228,7 @@
                                 <div class="flex justify-between"><span>Quarterly (4x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal * 4)"></span></div>
                             </div>
                         </div>
+                        <!-- Detailed Breakdown Toggle -->
                         <div class="bg-gray-50 p-4 border-t cursor-pointer" @click="showBreakdown = !showBreakdown">
                             <div class="flex justify-between text-xs font-bold text-gray-500 uppercase">
                                 <span>Detailed Breakdown</span>
@@ -217,6 +244,7 @@
                         </div>
                     </div>
 
+                    <!-- Actions -->
                     <div class="grid grid-cols-2 gap-3">
                         <button @click="saveSurvey" :disabled="!user || isSaving" class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg shadow transition flex justify-center items-center">
                             <span x-show="isSaving" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
@@ -233,6 +261,7 @@
 
         </div>
 
+        <!-- LOAD MODAL -->
         <div x-show="showLoadModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showLoadModal = false"></div>
@@ -259,6 +288,7 @@
             </div>
         </div>
 
+        <!-- TOAST NOTIFICATION -->
         <div x-show="toast.visible" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-2"
@@ -268,33 +298,19 @@
              x-transition:leave-end="opacity-0"
              class="fixed bottom-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50"
              :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
-             x-text="toast.message">
+             x-text="toast.message"
+             style="display: none;">
         </div>
 
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // CONFIG (Replace with your actual keys if environment vars aren't available)
-        const firebaseConfig = {
-            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
-            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
-            projectId: "hvac-site-survey-quoting-tool",
-            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
-            messagingSenderId: "228511119722",
-            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // ALPINE.JS LOGIC
+    <!-- MAIN APP SCRIPT -->
+    <!-- Note: We use a standard script tag here (not module) to ensure register event runs immediately -->
+    <script>
+        // --- 1. Register Alpine Component ---
         document.addEventListener('alpine:init', () => {
             Alpine.data('hvacApp', () => ({
+                // --- STATE ---
                 user: null,
                 isSaving: false,
                 showLoadModal: false,
@@ -303,7 +319,12 @@
                 savedSurveys: [],
                 toast: { visible: false, message: '', type: 'success' },
 
-                // The Main Data Object
+                // Firebase Globals (Initialized in init())
+                auth: null,
+                db: null,
+                firebaseConfig: null,
+
+                // Main Form Data
                 data: {
                     jobNo: '',
                     companyName: 'Mechanical Temp',
@@ -316,21 +337,85 @@
                     units: []
                 },
 
-                init() {
-                    // Auth Listener
-                    onAuthStateChanged(auth, (u) => {
-                        this.user = u;
-                        if(u) this.fetchSurveys();
-                    });
-
-                    // Add one empty unit to start if empty
+                // --- INITIALIZATION ---
+                async init() {
+                    console.log("App initializing...");
+                    
+                    // Add one empty unit if none exist
                     if(this.data.units.length === 0) this.addUnit();
+
+                    // Dynamically Import Firebase to control execution order
+                    try {
+                        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                        const { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithCustomToken, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                        const { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+                        // Expose Firebase functions to component scope
+                        this.fb = { signInWithPopup, GoogleAuthProvider, getAuth, getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp };
+
+                        // Config Logic
+                        this.firebaseConfig = {
+                            apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
+                            authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
+                            projectId: "hvac-site-survey-quoting-tool",
+                            storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
+                            messagingSenderId: "228511119722",
+                            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13",
+                            measurementId: "G-69DC64LV90"
+                        };
+
+                        // Use environment config if available (Preview Environment)
+                        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                            try {
+                                const envConfig = JSON.parse(__firebase_config);
+                                // Merge or replace
+                                this.firebaseConfig = envConfig;
+                                this.appIdStr = typeof __app_id !== 'undefined' ? __app_id : this.firebaseConfig.appId;
+                            } catch(e) { console.error("Env config parse error", e); }
+                        } else {
+                            // Fallback appId for hardcoded config
+                            this.appIdStr = "default-app-id"; 
+                        }
+
+                        // Initialize Firebase
+                        const app = initializeApp(this.firebaseConfig);
+                        this.auth = getAuth(app);
+                        this.db = getFirestore(app);
+
+                        // Auth Logic
+                        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(this.auth, initialAuthToken);
+                        } else {
+                            // Optional: Failover to anonymous if needed, or just wait for user Google Sign In
+                            // await signInAnonymously(this.auth);
+                        }
+
+                        // Auth Listener
+                        onAuthStateChanged(this.auth, (u) => {
+                            this.user = u;
+                            if(u && !u.isAnonymous) {
+                                this.fetchSurveys();
+                            }
+                        });
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                        this.showToast("Failed to load database connection.", "error");
+                    }
                 },
 
                 // --- ACTIONS ---
                 
-                signIn() {
-                    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => this.showToast(e.message, 'error'));
+                async signIn() {
+                    if (!this.auth) return;
+                    try {
+                        const provider = new this.fb.GoogleAuthProvider();
+                        await this.fb.signInWithPopup(this.auth, provider);
+                    } catch (e) {
+                        this.showToast(e.message, 'error');
+                    }
                 },
 
                 addUnit() {
@@ -363,39 +448,36 @@
                     if(confirm("Clear current form? Unsaved changes will be lost.")) {
                         this.currentDocId = null;
                         this.data.jobNo = '';
+                        this.data.companyName = 'Mechanical Temp'; // Reset default
+                        this.data.viewRef = '';
                         this.data.customerName = '';
                         this.data.serviceAddress = '';
                         this.data.siteName = '';
+                        this.data.locationNotes = '';
                         this.data.units = [];
                         this.addUnit();
                     }
                 },
 
-                // --- CALCULATIONS (Computed Logic) ---
+                // --- CALCULATIONS (Computed Helpers) ---
 
                 calculateUnitTotal(unit) {
-                    // This is just a helper for display on the card header
-                    // Doesn't include global trip fees, just unit specific costs
                     let cost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
-                    // Add VAV logic
                     cost += (unit.vavCount || 0) * 15;
-                    // Add Coil Clean Labor logic
                     if (unit.requiresCoilClean) {
-                        cost += (unit.tonnage >= 10) ? 60 : 45;
+                        let ton = parseFloat(unit.tonnage) || 0;
+                        cost += (ton >= 10 ? 60 : 45);
                     }
                     return cost;
                 },
 
                 get totals() {
                     let t = { unitPM: 0, vav: 0, coilLabor: 0, materials: 0 };
-                    
                     this.data.units.forEach(u => {
                         t.unitPM += (u.basePMCost || 0);
                         t.vav += (u.vavCount || 0) * 15;
                         t.materials += (u.coilCleanerMaterial || 0) + (u.additionalMaterial || 0);
-                        
                         if(u.requiresCoilClean) {
-                            // Default to lower tier if tonnage is null/0
                             let ton = parseFloat(u.tonnage) || 0;
                             t.coilLabor += (ton >= 10 ? 60 : 45);
                         }
@@ -409,63 +491,80 @@
                 },
 
                 formatCurrency(val) {
-                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
                 },
 
                 // --- FIREBASE OPS ---
 
                 async saveSurvey() {
+                    if(!this.user) return this.showToast("Please sign in first.", 'error');
                     if(!this.data.siteName) return this.showToast("Site Name is required", 'error');
                     
                     this.isSaving = true;
                     try {
                         if (!this.currentDocId) this.currentDocId = `survey-${Date.now()}`;
                         
-                        // We filter out UI-only state (like 'expanded') before saving if we wanted to be strict,
-                        // but saving it is fine for restoring state.
-                        const docRef = doc(db, `artifacts/${firebaseConfig.appId.split(':')[1]}/users/${this.user.uid}/hvac_surveys`, this.currentDocId);
+                        // Path construction
+                        // Note: Using hardcoded logic for this specific tool's requirement
+                        // If running in preview, using standard artifacts path logic
                         
-                        await setDoc(docRef, {
-                            ...this.data, // Spread data object
-                            lastUpdated: serverTimestamp()
-                        }, { merge: true });
+                        let path = `artifacts/${this.appIdStr}/users/${this.user.uid}/hvac_surveys`;
+                        
+                        // Prepare data (remove UI flags if needed, though expanded is fine)
+                        const dataToSave = {
+                            ...this.data,
+                            lastUpdated: this.fb.serverTimestamp()
+                        };
+
+                        const docRef = this.fb.doc(this.db, path, this.currentDocId);
+                        await this.fb.setDoc(docRef, dataToSave, { merge: true });
 
                         this.showToast("Saved Successfully!");
                     } catch (e) {
                         console.error(e);
-                        this.showToast("Error saving data", 'error');
+                        this.showToast("Error saving data: " + e.message, 'error');
                     } finally {
                         this.isSaving = false;
                     }
                 },
 
                 async fetchSurveys() {
+                    if (!this.user || !this.db) return;
                     try {
-                        const q = query(
-                            collection(db, `artifacts/${firebaseConfig.appId.split(':')[1]}/users/${this.user.uid}/hvac_surveys`),
-                            orderBy('lastUpdated', 'desc'),
-                            limit(10)
+                        let path = `artifacts/${this.appIdStr}/users/${this.user.uid}/hvac_surveys`;
+                        
+                        const q = this.fb.query(
+                            this.fb.collection(this.db, path),
+                            this.fb.orderBy('lastUpdated', 'desc'),
+                            this.fb.limit(10)
                         );
-                        const querySnapshot = await getDocs(q);
+                        
+                        const querySnapshot = await this.fb.getDocs(q);
                         this.savedSurveys = [];
                         querySnapshot.forEach((doc) => {
                             this.savedSurveys.push({ id: doc.id, ...doc.data() });
                         });
                         if(this.savedSurveys.length > 0) this.showLoadModal = true;
+                        else this.showToast("No saved surveys found.", "error");
+
                     } catch (e) {
                         console.error(e);
+                        this.showToast("Error fetching surveys", 'error');
                     }
                 },
 
                 loadSurvey(survey) {
                     this.currentDocId = survey.id;
-                    // Deep copy to break reference
                     let loadedData = JSON.parse(JSON.stringify(survey));
-                    // Cleanup internal fields
                     delete loadedData.id;
                     delete loadedData.lastUpdated;
                     
-                    // Assign to data
+                    // Defaults for backward compatibility
+                    if(!loadedData.units) loadedData.units = [];
+                    
+                    // UI state reset
+                    loadedData.units = loadedData.units.map(u => ({...u, expanded: false}));
+
                     this.data = loadedData;
                     this.showLoadModal = false;
                     this.showToast("Survey Loaded");
@@ -477,7 +576,7 @@
                     this.toast.visible = true;
                     setTimeout(() => this.toast.visible = false, 3000);
                 }
-            }));
+            }))
         });
     </script>
 </body>

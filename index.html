@@ -3,1022 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HVAC Site Survey</title>
-    <!-- Load Tailwind CSS -->
+    <title>HVAC Site Survey Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter font family -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
-        /* Style for the checkbox/toggle - Updated to Sky Blue */
-        .toggle-checkbox:checked {
-            @apply bg-sky-600 border-sky-600;
-        }
-        .text-input-xs { @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm p-1.5 border; }
-        .label-xs { @apply block text-xs font-medium text-gray-600; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f3f4f6; }
+        [x-cloak] { display: none !important; } /* Hides elements until Alpine loads */
+        .input-std { @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm py-2 px-3 border focus:border-sky-500 focus:ring-sky-500; }
+        .label-std { @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1; }
     </style>
 </head>
-<body class="p-4 md:p-8">
 
-    <div id="app" class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-extrabold text-gray-800 mb-6 border-b pb-2">Commercial HVAC Site Survey</h1>
+<body class="p-4 md:p-8" x-data="hvacApp()" x-cloak>
 
-        <!-- Updated Auth Status Section -->
-        <div id="auth-status" class="text-sm mb-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center border border-gray-300">
-            <span id="user-info" class="text-gray-600">
-                <span id="loading-spinner" class="animate-spin inline-block w-4 h-4 border-2 border-t-2 border-sky-500 rounded-full mr-2"></span>
-                Loading authentication...
-            </span>
-            <button id="google-sign-in-btn" onclick="signInWithGoogle()" class="px-3 py-1 bg-sky-600 text-white font-medium rounded-lg shadow-md hover:bg-sky-700 transition duration-150 flex items-center hidden">
-                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12.0001 4.75005C14.0772 4.75005 15.6841 5.56707 16.5925 6.45838L19.3664 3.68449C17.6534 1.95679 15.2255 1 12.0001 1C7.29173 1 3.20455 3.7381 1.48701 7.42279L4.99661 10.0275C5.8166 7.44738 8.64761 4.75005 12.0001 4.75005Z"/><path d="M22.5186 11.2334H22.5V11.25H12.0125C11.9796 11.2504 11.9467 11.2504 11.9137 11.2504C11.8596 11.2504 11.8055 11.2504 11.7514 11.2504L11.75 11.25C11.716 11.2504 11.6826 11.2504 11.6493 11.2504C11.637 11.2504 11.6247 11.2504 11.6124 11.2504C11.5947 11.2504 11.577 11.2504 11.5593 11.2504L11.5592 11.2504C11.5235 11.2504 11.4878 11.2504 11.4521 11.2504C11.4398 11.2504 11.4275 11.2504 11.4152 11.2504L11.4147 11.2504C11.3739 11.2504 11.3332 11.2504 11.2924 11.2504L1.75 11.25L1.75 12.75L11.2924 12.7504C11.3739 12.7504 11.4554 12.7504 11.5369 12.7504L11.5592 12.7504C11.5947 12.7504 11.6302 12.7504 11.6657 12.7504L11.6658 12.7504C11.7013 12.7504 11.7368 12.7504 11.7723 12.7504L11.7724 12.7504C11.8079 12.7504 11.8434 12.7504 11.8789 12.7504L11.879 12.7504C11.9145 12.7504 11.95 12.7504 11.9855 12.7504L11.9856 12.7504C12.0211 12.7504 12.0566 12.7504 12.0921 12.7504L12.0922 12.7504C12.1277 12.7504 12.1632 12.7504 12.1987 12.7504L12.1988 12.7504C12.2343 12.7504 12.2698 12.7504 12.3053 12.7504L22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504C22.5186 12.7504 22.5186 12.7504 22.5186 12.7504V11.2334Z"/><path d="M12.0001 20.0001C8.64761 20.0001 5.8166 17.3027 4.99661 14.7225L1.48701 17.3273C3.20455 21.012 7.29173 23.7501 12.0001 23.7501C15.2255 23.7501 17.6534 22.7933 19.3664 21.0656L16.5925 18.2917C15.6841 19.183 14.0772 20.0001 12.0001 20.0001Z"/><path d="M22.5186 11.2334H22.5V11.25L22.5186 11.2334ZM19.3664 3.68449L16.5925 6.45838C16.9427 6.80424 17.2929 7.1501 17.6431 7.49595L21.1528 10.1006C21.4929 9.3879 21.8331 8.67515 22.1733 7.9624L19.3664 3.68449Z"/></svg>
-                Sign in with Google
-            </button>
-        </div>
-
-        <!-- Survey List Modal -->
-        <div id="survey-list-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
-                <h2 class="text-2xl font-bold mb-4">Saved Surveys</h2>
-                <div id="surveys-container" class="space-y-3 max-h-80 overflow-y-auto pr-2">
-                    <!-- Survey list items will be inserted here -->
-                    <p id="no-surveys" class="text-gray-500 hidden">No saved surveys found.</p>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button onclick="closeSurveyList()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">Close</button>
-                    <button onclick="newSurvey()" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition duration-150">Start New Survey</button>
-                </div>
+    <div class="max-w-5xl mx-auto pb-20">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 bg-white p-6 rounded-xl shadow-sm">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">HVAC Site Survey</h1>
+                <p class="text-sm text-gray-500 mt-1">Commercial Estimation & Asset Tagging</p>
             </div>
-        </div>
-
-        <!-- Main Form -->
-        <div id="survey-form" class="space-y-8 bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
-
-            <!-- Site Information (Section 1) -->
-            <div class="p-5 bg-slate-100 rounded-lg border-l-4 border-sky-500">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">1. Site & Job Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    
-                    <!-- Row 1: Job Info -->
-                    <div>
-                        <label for="job-no" class="label-xs">Job No.</label>
-                        <input type="text" id="job-no" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 3978184">
-                    </div>
-                    <div>
-                        <label for="company-name" class="label-xs">Company</label>
-                        <input type="text" id="company-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" value="Mechanical Temp" placeholder="Your Company">
-                    </div>
-                    <div>
-                        <label for="view-ref" class="label-xs">View Ref (Company DBA)</label>
-                        <input type="text" id="view-ref" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., MT-DBA">
-                    </div>
-                    <div>
-                        <label for="location-type" class="label-xs">Location Type</label>
-                        <select id="location-type" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
-                            <option value="Commercial">Commercial</option>
-                            <option value="Residential">Residential</option>
-                            <option value="Industrial">Industrial</option>
-                        </select>
-                    </div>
-
-                    <!-- Row 2: Customer & Billing -->
-                    <div class="md:col-span-2">
-                        <label for="customer-name" class="label-xs">Customer Name (Site Contact)</label>
-                        <input type="text" id="customer-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Rally House #064">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="bill-to" class="label-xs">Bill To</label>
-                        <input type="text" id="bill-to" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Sampler Stores">
-                    </div>
-                    
-                    <!-- Row 3: Address & Site Name -->
-                    <div class="md:col-span-3">
-                        <label for="service-address" class="label-xs">Service Address (with City, State, Zip)</label>
-                        <input type="text" id="service-address" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 43575 W Oaks Dr, Novi, MI 48377, USA">
-                    </div>
-                    <div>
-                        <label for="site-name" class="label-xs">Site Name (Friendly Name)</label>
-                        <input type="text" id="site-name" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Novi Mall">
-                    </div>
-                    
-                    <!-- Row 4: Access & NTE -->
-                    <div>
-                        <label for="roof-access" class="label-xs">Roof Access</label>
-                        <select id="roof-access" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
-                            <option value="Yes">Yes (Easy Access)</option>
-                            <option value="Yes - Ladder Required">Yes (Ladder Required)</option>
-                            <option value="No">No (All Units Ground Level)</option>
-                            <option value="Unknown">Unknown</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="nte-limit" class="label-xs">NTE (Not To Exceed) Limit</label>
-                        <input type="number" id="nte-limit" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="e.g., 500.00 (If applicable)">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="label-xs">Number of Units Recorded</label>
-                        <p id="unit-count-display" class="text-2xl font-bold text-sky-600 mt-1">0</p>
-                    </div>
-                    
-                    <!-- New Row 5: Location Notes / Comments -->
-                    <div class="md:col-span-4">
-                        <label for="location-notes" class="label-xs">Location Notes / Site Comments (Door codes, key access, specific entry instructions)</label>
-                        <textarea id="location-notes" rows="3" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Use side door code 1234. Ladder is stored in closet 2. Keys are at front desk."></textarea>
-                    </div>
-                </div>
-                
-                <div class="mt-4 flex justify-between">
-                    <div>
-                        <button onclick="saveSurvey()" id="save-btn" class="w-full md:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                            Save Survey
-                        </button>
-                        <button onclick="openSurveyList()" class="w-full md:w-auto mt-2 md:mt-0 ml-0 md:ml-3 px-6 py-2 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            Load Existing Survey
-                        </button>
-                    </div>
-                    <div id="map-link-container" class="hidden">
-                        <a id="view-map-link" href="#" target="_blank" class="px-4 py-2 bg-sky-500 text-white font-semibold rounded-lg shadow-md hover:bg-sky-600 transition duration-150">
-                            View Map (SVC Address)
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Equipment Details -->
-            <div class="p-5 bg-white rounded-lg border-l-4 border-gray-300">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
-                    2. Equipment Details
-                    <button onclick="addUnit()" class="flex items-center text-sm px-3 py-1 bg-sky-500 text-white rounded-lg shadow-md hover:bg-sky-600 transition duration-150">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Add New Unit
+            
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                <template x-if="!user">
+                    <button @click="signIn" class="flex items-center px-4 py-2 bg-sky-600 text-white font-medium rounded-lg shadow hover:bg-sky-700 transition">
+                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                        Sign in with Google
                     </button>
-                </h2>
-
-                <div id="units-container" class="space-y-6">
-                    <!-- Unit cards will be injected here -->
-                    <p id="no-units-message" class="text-gray-500 text-center p-4 border rounded-lg">Click "Add New Unit" to begin recording equipment.</p>
-                </div>
+                </template>
+                <template x-if="user">
+                    <div class="flex items-center bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                        <span class="text-xs font-medium text-green-800" x-text="user.email"></span>
+                    </div>
+                </template>
             </div>
+        </div>
 
-            <!-- Pricing / Notes Summary -->
-            <div class="p-5 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">3. Quoting Summary</h2>
-                <p class="text-sm text-gray-600 mb-4">Estimates based on your internal pricing structure.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div class="bg-white p-3 rounded-lg shadow-sm border">
-                        <h3 class="font-bold text-sky-700">Estimated Total Cost Per Visit</h3>
-                        <p class="text-3xl font-bold text-green-600 mt-2">
-                            $<span id="pm-total-display">0.00</span>
-                        </p>
-                        <p class="text-xs text-gray-500 italic mt-1">
-                            Base Trip Labor ($430) + Unit PMs + Addtl Costs (VAV, Coil Clean, Materials)
-                        </p>
-                    </div>
-
-                    <div class="bg-white p-3 rounded-lg shadow-sm border">
-                        <h3 class="font-bold text-sky-700">Service Frequency Estimates</h3>
-                        <ul class="space-y-1 mt-2">
-                            <li class="flex justify-between border-b pb-1"><span>Annual (1x):</span> <span class="font-semibold text-gray-800">$<span id="annual-total">0.00</span></span></li>
-                            <li class="flex justify-between border-b py-1"><span>Semi-Annual (2x):</span> <span class="font-semibold text-gray-800">$<span id="semi-annual-total">0.00</span></span></li>
-                            <li class="flex justify-between pt-1"><span>Quarterly (4x):</span> <span class="font-semibold text-gray-800">$<span id="quarterly-total">0.00</span></span></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="mt-6 p-3 bg-gray-100 rounded-lg">
-                    <h3 class="font-bold text-gray-800 mb-2">Detailed Cost Breakdown (Per Visit)</h3>
-                    <ul class="list-disc list-inside space-y-1 text-xs text-gray-700">
-                        <li>**Base Trip/Labor ($430.00):** Fixed cost for service truck/base time.</li>
-                        <li>**Unit PM Cost:** $<span id="breakdown-unit-pm">0.00</span> (Sum of all individual unit PM prices)</li>
-                        <li>**VAV Start-up Cost:** $<span id="breakdown-vav">0.00</span> (Calculated at $15 per VAV box)</li>
-                        <li>**Coil Cleaning Labor/Fee:** $<span id="breakdown-coil-clean-fee">0.00</span> (Calculated at $45 < 10T or $60 > 10T per unit marked for wash)</li>
-                        <li>**Addtl Material Cost:** $<span id="breakdown-material">0.00</span> (Sum of Additional Material and Coil Cleaner Material costs)</li>
-                    </ul>
+        <div x-show="!user" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r shadow-sm">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        You are in <strong>Read-Only Mode</strong>. Sign in to Save/Load surveys.
+                    </p>
                 </div>
             </div>
         </div>
-        <!-- Overlay to prevent interaction when not authenticated -->
-        <div id="auth-overlay" class="absolute inset-0 bg-white bg-opacity-90 rounded-xl shadow-lg flex items-center justify-center p-8 text-center hidden">
-            <p class="text-xl text-gray-700 font-semibold">Please sign in with Google to access the Site Survey tool.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 space-y-6">
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2 flex items-center">
+                        <span class="bg-sky-100 text-sky-600 w-6 h-6 rounded flex items-center justify-center text-xs mr-2">1</span>
+                        Job Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="label-std">Job No.</label><input x-model="data.jobNo" type="text" class="input-std" placeholder="e.g. 3978184"></div>
+                        <div><label class="label-std">Company</label><input x-model="data.companyName" type="text" class="input-std"></div>
+                        <div><label class="label-std">View Ref (DBA)</label><input x-model="data.viewRef" type="text" class="input-std"></div>
+                        <div><label class="label-std">Customer Name</label><input x-model="data.customerName" type="text" class="input-std"></div>
+                        <div class="md:col-span-2"><label class="label-std">Service Address</label><input x-model="data.serviceAddress" type="text" class="input-std"></div>
+                        <div><label class="label-std">Site Name</label><input x-model="data.siteName" type="text" class="input-std" placeholder="Friendly Name"></div>
+                        <div>
+                            <label class="label-std">Roof Access</label>
+                            <select x-model="data.roofAccess" class="input-std">
+                                <option>Yes (Easy Access)</option>
+                                <option>Yes (Ladder Required)</option>
+                                <option>No (Ground Level)</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2"><label class="label-std">Access Notes / Codes</label><textarea x-model="data.locationNotes" rows="2" class="input-std"></textarea></div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-xl font-bold text-gray-800">Equipment List</h2>
+                        <button @click="addUnit()" class="bg-sky-600 hover:bg-sky-700 text-white text-sm px-4 py-2 rounded-lg shadow flex items-center transition">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add Unit
+                        </button>
+                    </div>
+
+                    <template x-if="data.units.length === 0">
+                        <div class="text-center p-10 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl text-gray-500">
+                            No units added yet. Click "Add Unit" to start.
+                        </div>
+                    </template>
+
+                    <template x-for="(unit, index) in data.units" :key="unit.id">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition hover:shadow-md">
+                            
+                            <div class="bg-gray-50 p-4 border-b flex justify-between items-center cursor-pointer" @click="unit.expanded = !unit.expanded">
+                                <div class="flex items-center">
+                                    <div class="bg-sky-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3" x-text="index + 1"></div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800" x-text="unit.brand + ' ' + unit.type"></h3>
+                                        <p class="text-xs text-gray-500" x-text="unit.model ? 'Model: ' + unit.model : 'No Model Info'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-green-600 font-bold text-sm" x-text="'$' + calculateUnitTotal(unit).toFixed(2)"></span>
+                                    <button @click.stop="removeUnit(index)" class="text-red-400 hover:text-red-600 p-1">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <svg class="w-5 h-5 text-gray-400 transform transition-transform" :class="{'rotate-180': unit.expanded}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+
+                            <div x-show="unit.expanded" class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-white">
+                                <div><label class="label-std">Type</label>
+                                    <select x-model="unit.type" class="input-std">
+                                        <option value="RTU">RTU</option>
+                                        <option value="Split System">Split System</option>
+                                        <option value="Condenser">Condenser</option>
+                                        <option value="VAV">VAV</option>
+                                    </select>
+                                </div>
+                                <div><label class="label-std">Brand</label><input x-model="unit.brand" type="text" class="input-std"></div>
+                                <div><label class="label-std">Model</label><input x-model="unit.model" type="text" class="input-std"></div>
+                                
+                                <div><label class="label-std">Serial</label><input x-model="unit.serialNumber" type="text" class="input-std"></div>
+                                <div><label class="label-std">Tonnage</label><input x-model="unit.tonnage" type="number" class="input-std" placeholder="e.g. 5"></div>
+                                <div><label class="label-std">VAV Count</label><input x-model.number="unit.vavCount" type="number" class="input-std"></div>
+
+                                <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b py-4 my-2">
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <div class="flex justify-between mb-2">
+                                            <label class="label-std mb-0">Filters</label>
+                                            <button @click="unit.filters.push({qty:1, size:''})" class="text-xs text-sky-600 font-bold">+ Add Filter</button>
+                                        </div>
+                                        <template x-for="(filter, fIndex) in unit.filters" :key="fIndex">
+                                            <div class="flex gap-2 mb-2">
+                                                <input x-model="filter.qty" type="number" class="w-16 rounded border-gray-300 text-sm" placeholder="#">
+                                                <input x-model="filter.size" type="text" class="flex-1 rounded border-gray-300 text-sm" placeholder="Size (e.g. 16x25x2)">
+                                                <button @click="unit.filters.splice(fIndex, 1)" class="text-red-500 hover:text-red-700">x</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <div class="flex justify-between mb-2">
+                                            <label class="label-std mb-0">Belts</label>
+                                            <button @click="unit.belts.push({qty:1, size:''})" class="text-xs text-sky-600 font-bold">+ Add Belt</button>
+                                        </div>
+                                        <template x-for="(belt, bIndex) in unit.belts" :key="bIndex">
+                                            <div class="flex gap-2 mb-2">
+                                                <input x-model="belt.qty" type="number" class="w-16 rounded border-gray-300 text-sm" placeholder="#">
+                                                <input x-model="belt.size" type="text" class="flex-1 rounded border-gray-300 text-sm" placeholder="Size (e.g. A45)">
+                                                <button @click="unit.belts.splice(bIndex, 1)" class="text-red-500 hover:text-red-700">x</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-3 bg-yellow-50 p-3 rounded border border-yellow-200 grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                                    <div><label class="label-std">Base PM ($)</label><input x-model.number="unit.basePMCost" type="number" class="input-std"></div>
+                                    <div><label class="label-std">Cleaner Mat ($)</label><input x-model.number="unit.coilCleanerMaterial" type="number" class="input-std"></div>
+                                    <div><label class="label-std">Extra Mat ($)</label><input x-model.number="unit.additionalMaterial" type="number" class="input-std"></div>
+                                    
+                                    <div class="flex items-center h-10">
+                                        <input x-model="unit.requiresCoilClean" type="checkbox" class="h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
+                                        <label class="ml-2 block text-sm text-gray-900">Needs Coil Wash</label>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="label-std">Technician Notes</label>
+                                    <textarea x-model="unit.notes" rows="2" class="input-std" placeholder="Condition, access issues, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="sticky top-6 space-y-4">
+                    
+                    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-800 p-4">
+                            <h3 class="text-white font-bold text-lg">Quote Summary</h3>
+                            <p class="text-gray-400 text-xs">Based on current inputs</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-gray-600 font-medium">Cost Per Visit</span>
+                                <span class="text-3xl font-extrabold text-sky-600" x-text="formatCurrency(grandTotal)"></span>
+                            </div>
+                            <div class="text-xs text-gray-500 mb-6 border-b pb-4">
+                                Includes Base Trip ($430), Unit PMs, VAVs ($15ea), and Materials.
+                            </div>
+
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span>Annual (1x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal)"></span></div>
+                                <div class="flex justify-between"><span>Semi-Annual (2x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal * 2)"></span></div>
+                                <div class="flex justify-between"><span>Quarterly (4x)</span> <span class="font-bold" x-text="formatCurrency(grandTotal * 4)"></span></div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 border-t cursor-pointer" @click="showBreakdown = !showBreakdown">
+                            <div class="flex justify-between text-xs font-bold text-gray-500 uppercase">
+                                <span>Detailed Breakdown</span>
+                                <span x-text="showBreakdown ? '-' : '+'"></span>
+                            </div>
+                            <div x-show="showBreakdown" class="mt-3 space-y-1 text-xs text-gray-600" x-transition>
+                                <div class="flex justify-between"><span>Base Labor:</span> <span>$430.00</span></div>
+                                <div class="flex justify-between"><span>Unit PM Sum:</span> <span x-text="formatCurrency(totals.unitPM)"></span></div>
+                                <div class="flex justify-between"><span>VAV Add-on:</span> <span x-text="formatCurrency(totals.vav)"></span></div>
+                                <div class="flex justify-between"><span>Coil Labor:</span> <span x-text="formatCurrency(totals.coilLabor)"></span></div>
+                                <div class="flex justify-between"><span>Materials:</span> <span x-text="formatCurrency(totals.materials)"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="saveSurvey" :disabled="!user || isSaving" class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg shadow transition flex justify-center items-center">
+                            <span x-show="isSaving" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                            Save
+                        </button>
+                        <button @click="fetchSurveys" :disabled="!user" class="bg-white border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg shadow-sm transition">
+                            Load
+                        </button>
+                        <button @click="resetForm" class="col-span-2 text-xs text-gray-500 hover:text-red-500 underline">Start New / Reset</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div x-show="showLoadModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showLoadModal = false"></div>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Saved Surveys</h3>
+                        <div class="mt-4 max-h-60 overflow-y-auto space-y-2">
+                            <template x-if="savedSurveys.length === 0"><p class="text-gray-500">No saved surveys found.</p></template>
+                            <template x-for="survey in savedSurveys" :key="survey.id">
+                                <div @click="loadSurvey(survey)" class="p-3 border rounded hover:bg-sky-50 cursor-pointer flex justify-between items-center group">
+                                    <div>
+                                        <div class="font-bold text-gray-700" x-text="survey.siteName || 'Unnamed'"></div>
+                                        <div class="text-xs text-gray-500" x-text="new Date(survey.lastUpdated.seconds * 1000).toLocaleDateString()"></div>
+                                    </div>
+                                    <button class="text-sky-600 text-sm font-bold opacity-0 group-hover:opacity-100">Load</button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="showLoadModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="toast.visible" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed bottom-5 right-5 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50"
+             :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
+             x-text="toast.message">
         </div>
 
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs, updateDoc, deleteDoc, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Firebase and App variables
-        let app;
-        let db;
-        let auth;
-        let userId = null;
-        let currentSurveyId = null;
-
-        // User-provided Firebase Configuration as a fallback, used if environment variables are missing.
-        const FALLBACK_FIREBASE_CONFIG = {
+        // CONFIG (Replace with your actual keys if environment vars aren't available)
+        const firebaseConfig = {
             apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
             authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
             projectId: "hvac-site-survey-quoting-tool",
             storageBucket: "hvac-site-survey-quoting-tool.firebasestorage.app",
             messagingSenderId: "228511119722",
-            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13",
-            measurementId: "G-69DC64LV90"
+            appId: "1:228511119722:web:c2551e4ca7bd85842fcd13"
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // Safely determine firebaseConfig, prioritizing environment variables but falling back to the user's provided config.
-        let firebaseConfig = null;
-        try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                firebaseConfig = JSON.parse(__firebase_config);
-            } else {
-                firebaseConfig = FALLBACK_FIREBASE_CONFIG;
-                console.warn("Using fallback Firebase configuration.");
-            }
-        } catch (e) {
-            console.error("Error parsing environment Firebase config, falling back.", e);
-            firebaseConfig = FALLBACK_FIREBASE_CONFIG;
-        }
-
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Quoting Constants based on user's initial data dump (using midpoints for ranges)
-        const QUOTE_CONSTANTS = {
-            BASE_TRIP_LABOR: 430, // $430 for Parts/Labor
-            VAV_ADD_ON: 15,       // $15 per VAV box
-            COIL_CLEAN_UNDER_10T: 45, // Midpoint of $35-$55
-            COIL_CLEAN_OVER_10T: 60   // Midpoint of $55-$65
-        };
-
-        const UNITS_DEFAULT = [
-            { 
-                id: Date.now() + 1, 
-                unitNumber: 1, 
-                type: 'RTU', 
-                brand: 'Carrier', 
-                model: '39LNA', 
-                serialNumber: 'X123456789', 
-                btuRating: '100,000-150,000', 
-                tonnage: '5 Tons', 
-                filters: [{ qty: 1, size: '16x25x2' }], 
-                belts: [{ qty: 1, size: 'A35' }], 
-                notes: 'Unit on curb, easy access.', 
-                basePMCost: 100, 
-                coilCleanerMaterial: 15, 
-                additionalMaterial: 0, 
-                requiresCoilClean: true, 
-                refrigerantType: 'R-410A', 
-                vavCount: 0, 
-                showDetails: true 
-            },
-        ];
-
-        let surveyData = {
-            jobNo: '',
-            companyName: 'Mechanical Temp',
-            viewRef: '',
-            customerName: '',
-            billTo: '',
-            serviceAddress: '',
-            locationType: 'Commercial',
-            nteLimit: null, // Changed default to null for number field
-            siteName: '',
-            roofAccess: 'Yes',
-            locationNotes: '', // NEW FIELD INITIALIZED
-            units: UNITS_DEFAULT.map(u => ({...u}))
-        };
-        
-        // --- AUTHENTICATION FUNCTIONS ---
-
-        window.signInWithGoogle = async function() {
-            if (!auth) {
-                alertUser("Authentication service is not initialized.", "bg-red-500");
-                return;
-            }
-            const provider = new GoogleAuthProvider();
-            try {
-                // This triggers the Google sign-in flow
-                await signInWithPopup(auth, provider);
-                alertUser("Signed in successfully with Google!", "bg-green-500");
-            } catch (error) {
-                // If the popup is closed by the user, this catch block handles it.
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    console.error("Google Sign-In Error:", error);
-                    alertUser(`Sign-In failed: ${error.message}`, "bg-red-500");
-                }
-            }
-        }
-
-        // --- Utility Functions ---
-
-        /** Generates HTML for the filters list of a unit. */
-        function createFilterListHtml(unit) {
-            if (!unit.filters || unit.filters.length === 0) {
-                return '<p class="text-xs text-gray-500 italic mt-2">No filters recorded.</p>';
-            }
-            
-            return unit.filters.map((filter, index) => `
-                <div class="flex space-x-2 items-center mb-1">
-                    <input type="number" value="${filter.qty || 1}" 
-                           onchange="updateFilter(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
-                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
-                    <input type="text" value="${filter.size || ''}" 
-                           onchange="updateFilter(${unit.id}, ${index}, 'size', this.value)" 
-                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., 16x25x2)">
-                    <button onclick="removeFilter(${unit.id}, ${index})" 
-                            class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
-                            type="button">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        /** Generates HTML for the belts list of a unit. */
-        function createBeltListHtml(unit) {
-            if (!unit.belts || unit.belts.length === 0) {
-                return '<p class="text-xs text-gray-500 italic mt-2">No belts recorded.</p>';
-            }
-
-            return unit.belts.map((belt, index) => `
-                <div class="flex space-x-2 items-center mb-1">
-                    <input type="number" value="${belt.qty || 1}" 
-                           onchange="updateBelt(${unit.id}, ${index}, 'qty', parseInt(this.value) || 0)" 
-                           class="w-1/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="Qty">
-                    <input type="text" value="${belt.size || ''}" 
-                           onchange="updateBelt(${unit.id}, ${index}, 'size', this.value)" 
-                           class="w-3/4 rounded-md border-gray-300 shadow-sm text-sm p-1.5 border focus:border-sky-500 focus:ring-sky-500" placeholder="Size (e.g., A35, B50)">
-                    <button onclick="removeBelt(${unit.id}, ${index})" 
-                            class="text-red-500 hover:text-red-700 p-1 rounded-md transition duration-150" 
-                            type="button">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                    </button>
-                </button>
-                </div>
-            `).join('');
-        }
-
-
-        /** Generates HTML for a single unit card. */
-        function createUnitCardHtml(unit) {
-            const unitTypes = ['RTU', 'Furnace', 'Condensing Unit', 'Split System', 'VAV', 'Boiler', 'Other'];
-            const btuOptions = ['NA', '50,000-100,000', '100,000-150,000', '150,000-250,000', '250,000+'];
-            const beltDDOptions = ['DD - Direct Drive', 'Belt Driven', 'NA'];
-
-            const unitTypeOptions = unitTypes.map(type =>
-                `<option value="${type}" ${unit.type === type ? 'selected' : ''}>${type}</option>`
-            ).join('');
-
-            const btuRatingOptions = btuOptions.map(btu =>
-                `<option value="${btu}" ${unit.btuRating === btu ? 'selected' : ''}>${btu}</option>`
-            ).join('');
-
-            const totalUnitCost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
-
-            return `
-                <div id="unit-${unit.id}" class="bg-slate-50 p-4 border border-gray-200 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-bold text-gray-700">Unit #${unit.unitNumber}</h3>
-                        <div class="flex space-x-2">
-                            <button onclick="toggleDetails(${unit.id})" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition duration-150" type="button">
-                                ${unit.showDetails ? 'Hide Details' : 'Show Details'}
-                            </button>
-                            <button onclick="removeUnit(${unit.id})" class="text-red-500 hover:text-red-700 transition duration-150" type="button">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="space-y-3 ${unit.showDetails ? 'block' : 'hidden'}" id="unit-details-${unit.id}">
-                        <!-- Row 1: Brand, Model, Serial Number -->
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="label-xs">Brand</label>
-                                <input type="text" value="${unit.brand || ''}" onchange="updateUnit(${unit.id}, 'brand', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Carrier, Trane, etc.">
-                            </div>
-                            <div>
-                                <label class="label-xs">Model</label>
-                                <input type="text" value="${unit.model || ''}" onchange="updateUnit(${unit.id}, 'model', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 39LNA08">
-                            </div>
-                            <div>
-                                <label class="label-xs">Serial Number</label>
-                                <input type="text" value="${unit.serialNumber || ''}" onchange="updateUnit(${unit.id}, 'serialNumber', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="Data tag info">
-                            </div>
-                        </div>
-
-                        <!-- Row 2: Type, Tonnage, BTU, Drive -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div>
-                                <label class="label-xs">Type</label>
-                                <select onchange="updateUnit(${unit.id}, 'type', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
-                                    ${unitTypeOptions}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="label-xs">Tonnage / Size</label>
-                                <input type="text" value="${unit.tonnage || ''}" onchange="updateUnit(${unit.id}, 'tonnage', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 5 Tons">
-                            </div>
-                            <div>
-                                <label class="label-xs">BTU Rating</label>
-                                <select onchange="updateUnit(${unit.id}, 'btuRating', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
-                                    ${btuRatingOptions}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="label-xs">Drive Type</label>
-                                <select onchange="updateUnit(${unit.id}, 'beltDD', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500">
-                                    ${beltDDOptions.map(bd => `<option value="${bd}" ${unit.beltDD === bd ? 'selected' : ''}>${bd}</option>`).join('')}
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Row 3: Filters (Dynamic List) -->
-                        <div class="p-3 bg-white border border-gray-200 rounded-lg">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="label-xs font-bold text-gray-800">Filter Sizes & Quantities</label>
-                                <button onclick="addFilter(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Filter</button>
-                            </div>
-                            <div id="filter-list-${unit.id}">
-                                ${createFilterListHtml(unit)}
-                            </div>
-                        </div>
-
-                        <!-- Row 4: Belts (Dynamic List) -->
-                        <div class="p-3 bg-white border border-gray-200 rounded-lg">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="label-xs font-bold text-gray-800">Belt Sizes & Quantities</label>
-                                <button onclick="addBelt(${unit.id})" class="text-xs px-2 py-0.5 bg-sky-500 text-white rounded hover:bg-sky-600 transition duration-150" type="button">+ Add Belt</button>
-                            </div>
-                            <div id="belt-list-${unit.id}">
-                                ${createBeltListHtml(unit)}
-                            </div>
-                        </div>
-
-                        <!-- Row 5: Refrigerant, VAV, Coil Clean Flag -->
-                        <div class="grid grid-cols-4 gap-3">
-                            <div class="col-span-2">
-                                <label class="label-xs">Refrigerant Type</label>
-                                <input type="text" value="${unit.refrigerantType || ''}" onchange="updateUnit(${unit.id}, 'refrigerantType', this.value)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="R-410A, R-22, etc.">
-                            </div>
-                            <div>
-                                <label class="label-xs">VAV Boxes (Count)</label>
-                                <input type="number" value="${unit.vavCount || 0}" onchange="updateUnit(${unit.id}, 'vavCount', parseInt(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0">
-                            </div>
-                            <div class="flex items-center pt-3">
-                                <input type="checkbox" id="coil-clean-${unit.id}" ${unit.requiresCoilClean ? 'checked' : ''} onchange="updateUnit(${unit.id}, 'requiresCoilClean', this.checked)" class="toggle-checkbox h-4 w-4 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
-                                <label for="coil-clean-${unit.id}" class="ml-2 block text-sm font-medium text-gray-700">Requires Coil Wash</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Row 6: Material Costs -->
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="label-xs">Coil Cleaner Material ($)</label>
-                                <input type="number" value="${unit.coilCleanerMaterial || 0}" onchange="updateUnit(${unit.id}, 'coilCleanerMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="label-xs">Addtl Material ($)</label>
-                                <input type="number" value="${unit.additionalMaterial || 0}" onchange="updateUnit(${unit.id}, 'additionalMaterial', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" min="0" placeholder="0.00">
-                            </div>
-                            <div class="col-span-1">
-                                <label class="label-xs">Base Unit PM Price ($)</label>
-                                <input type="number" value="${unit.basePMCost || 0}" onchange="updateUnit(${unit.id}, 'basePMCost', parseFloat(this.value) || 0)" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., 100">
-                            </div>
-                        </div>
-
-                        <!-- Notes -->
-                        <div>
-                            <label class="label-xs">Notes (Access, Condition, Belt Type, Other Details)</label>
-                            <textarea onchange="updateUnit(${unit.id}, 'notes', this.value)" rows="2" class="text-input-xs focus:border-sky-500 focus:ring-sky-500" placeholder="e.g., Easy access, unit needs new belts, data tag picture taken.">${unit.notes || ''}</textarea>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        /** Renders the entire survey form based on the current surveyData object and performs new calculations. */
-        function renderForm() {
-            // Check if essential UI elements are available to prevent the 'Cannot set properties of null' error
-            const pmTotalDisplay = document.getElementById('pm-total-display');
-            if (!pmTotalDisplay) {
-                console.warn("renderForm called before all summary elements were available.");
-                return; 
-            }
-
-            // --- Update Site Info Inputs (NEW FIELDS) ---
-            document.getElementById('job-no').value = surveyData.jobNo;
-            document.getElementById('company-name').value = surveyData.companyName;
-            document.getElementById('view-ref').value = surveyData.viewRef;
-            document.getElementById('customer-name').value = surveyData.customerName;
-            document.getElementById('bill-to').value = surveyData.billTo;
-            document.getElementById('service-address').value = surveyData.serviceAddress;
-            document.getElementById('location-type').value = surveyData.locationType;
-            document.getElementById('nte-limit').value = surveyData.nteLimit !== null ? surveyData.nteLimit : '';
-            
-            // Existing fields
-            document.getElementById('site-name').value = surveyData.siteName;
-            document.getElementById('roof-access').value = surveyData.roofAccess;
-            document.getElementById('location-notes').value = surveyData.locationNotes; // LOAD NEW FIELD
-
-            // Update Map Link (dynamically generate Google Maps URL)
-            const mapLink = document.getElementById('view-map-link');
-            const mapLinkContainer = document.getElementById('map-link-container');
-            if (surveyData.serviceAddress) {
-                const encodedAddress = encodeURIComponent(surveyData.serviceAddress);
-                mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-                mapLinkContainer.classList.remove('hidden');
-            } else {
-                mapLinkContainer.classList.add('hidden');
-            }
-
-
-            // Update Unit Count Display
-            const unitCount = surveyData.units.length;
-            document.getElementById('unit-count-display').textContent = unitCount;
-
-            // Update Units Container
-            const container = document.getElementById('units-container');
-            if (unitCount === 0) {
-                container.innerHTML = `<p id="no-units-message" class="text-gray-500 text-center p-4 border rounded-lg">Click "Add New Unit" to begin recording equipment.</p>`;
-            } else {
-                container.innerHTML = surveyData.units
-                    .sort((a, b) => a.unitNumber - b.unitNumber)
-                    .map(createUnitCardHtml).join('');
-            }
-
-            // --- REFINED QUOTING SUMMARY LOGIC ---
-            
-            let totalUnitPMCost = 0; // Sum of unit.basePMCost
-            let totalVAVCost = 0;
-            let totalCoilCleanFee = 0; // Coil wash labor/fee
-            let totalMaterialCost = 0; // Sum of unit.additionalMaterial + unit.coilCleanerMaterial
-
-            surveyData.units.forEach(unit => {
-                // Parse tonnage to determine coil clean fee tier
-                const tonnageMatch = unit.tonnage ? unit.tonnage.match(/(\d+\.?\d*)/) : null;
-                const tonnage = tonnageMatch ? parseFloat(tonnageMatch[0]) : 0;
-
-                // 1. Unit PM Cost (Base labor/parts per unit)
-                totalUnitPMCost += (unit.basePMCost || 0);
-
-                // 2. VAV Cost (Start-up add $15 to ea VAV)
-                if ((unit.vavCount || 0) > 0) {
-                    totalVAVCost += unit.vavCount * QUOTE_CONSTANTS.VAV_ADD_ON;
-                }
-
-                // 3. Coil Cleaning Labor Fee (Condenser coil wash)
-                if (unit.requiresCoilClean) {
-                    if (tonnage < 10 && tonnage > 0) {
-                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_UNDER_10T;
-                    } else if (tonnage >= 10) {
-                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_OVER_10T;
-                    } else {
-                        // Fallback if tonnage is unknown, assume lower tier for quote safety
-                        totalCoilCleanFee += QUOTE_CONSTANTS.COIL_CLEAN_UNDER_10T;
-                    }
-                }
-
-                // 4. Material Costs (Additional Material + Coil Cleaner Material)
-                totalMaterialCost += (unit.additionalMaterial || 0) + (unit.coilCleanerMaterial || 0);
-            });
-
-            // TOTAL PM PRICE PER VISIT
-            const TOTAL_VISIT_PRICE = QUOTE_CONSTANTS.BASE_TRIP_LABOR + totalUnitPMCost + totalVAVCost + totalCoilCleanFee + totalMaterialCost;
-
-            // Update Summary Display (safe because of the initial check)
-            pmTotalDisplay.textContent = TOTAL_VISIT_PRICE.toFixed(2);
-            document.getElementById('annual-total').textContent = TOTAL_VISIT_PRICE.toFixed(2);
-            document.getElementById('semi-annual-total').textContent = (TOTAL_VISIT_PRICE * 2).toFixed(2);
-            document.getElementById('quarterly-total').textContent = (TOTAL_VISIT_PRICE * 4).toFixed(2);
-
-            // Update Breakdown Display
-            document.getElementById('breakdown-unit-pm').textContent = totalUnitPMCost.toFixed(2);
-            document.getElementById('breakdown-vav').textContent = totalVAVCost.toFixed(2);
-            document.getElementById('breakdown-coil-clean-fee').textContent = totalCoilCleanFee.toFixed(2);
-            document.getElementById('breakdown-material').textContent = totalMaterialCost.toFixed(2);
-        }
-
-        // --- CRUD Operations for Units ---
-
-        window.addUnit = function() {
-            const nextUnitNumber = surveyData.units.length > 0
-                ? Math.max(...surveyData.units.map(u => u.unitNumber)) + 1
-                : 1;
-
-            const newUnit = {
-                id: Date.now(),
-                unitNumber: nextUnitNumber,
-                type: 'RTU',
-                brand: '', 
-                model: '', 
-                serialNumber: '', 
-                btuRating: 'NA',
-                tonnage: '',
-                filters: [{ qty: 1, size: '' }], 
-                belts: [{ qty: 1, size: '' }], 
-                notes: '',
-                basePMCost: 0,
-                coilCleanerMaterial: 0,
-                additionalMaterial: 0,
-                requiresCoilClean: false,
-                refrigerantType: '',
-                vavCount: 0,
-                showDetails: true
-            };
-
-            surveyData.units.push(newUnit);
-            renderForm();
-            saveSurvey();
-        }
-
-        window.updateUnit = function(unitId, key, value) {
-            const unitIndex = surveyData.units.findIndex(u => u.id === unitId);
-            if (unitIndex > -1) {
-                surveyData.units[unitIndex][key] = value;
-                // Re-render only if the update impacts the summary or a calculated field
-                if (['basePMCost', 'coilCleanerMaterial', 'additionalMaterial', 'tonnage', 'requiresCoilClean', 'vavCount'].includes(key)) {
-                    renderForm();
-                }
-                saveSurvey(); // Save changes to Firestore
-            }
-        }
-
-        // --- Nested Array Management (Filters) ---
-
-        /** Gets a unit object safely. */
-        function getUnit(unitId) {
-            const unit = surveyData.units.find(u => u.id === unitId);
-            if (!unit) {
-                console.error(`Unit with ID ${unitId} not found.`);
-            }
-            return unit;
-        }
-
-        window.addFilter = function(unitId) {
-            const unit = getUnit(unitId);
-            if (unit) {
-                if (!unit.filters) unit.filters = [];
-                unit.filters.push({ qty: 1, size: '' });
-                renderForm();
-                saveSurvey();
-            }
-        }
-
-        window.updateFilter = function(unitId, filterIndex, key, value) {
-            const unit = getUnit(unitId);
-            if (unit && unit.filters && unit.filters[filterIndex]) {
-                unit.filters[filterIndex][key] = value;
-                // No quote calculation change, just save
-                saveSurvey();
-            }
-        }
-
-        window.removeFilter = function(unitId, filterIndex) {
-            const unit = getUnit(unitId);
-            if (unit && unit.filters && unit.filters.length > filterIndex) {
-                unit.filters.splice(filterIndex, 1);
-                renderForm();
-                saveSurvey();
-            }
-        }
-
-        // --- Nested Array Management (Belts) ---
-
-        window.addBelt = function(unitId) {
-            const unit = getUnit(unitId);
-            if (unit) {
-                if (!unit.belts) unit.belts = [];
-                unit.belts.push({ qty: 1, size: '' });
-                renderForm();
-                saveSurvey();
-            }
-        }
-
-        window.updateBelt = function(unitId, beltIndex, key, value) {
-            const unit = getUnit(unitId);
-            if (unit && unit.belts && unit.belts[beltIndex]) {
-                unit.belts[beltIndex][key] = value;
-                // No quote calculation change, just save
-                saveSurvey();
-            }
-        }
-
-        window.removeBelt = function(unitId, beltIndex) {
-            const unit = getUnit(unitId);
-            if (unit && unit.belts && unit.belts.length > beltIndex) {
-                unit.belts.splice(beltIndex, 1);
-                renderForm();
-                saveSurvey();
-            }
-        }
-
-        // --- Standard Unit Management ---
-
-        window.removeUnit = function(unitId) {
-            // Use custom UI instead of window.confirm
-            if (!confirm("Are you sure you want to remove this unit?")) return;
-
-            surveyData.units = surveyData.units.filter(u => u.id !== unitId);
-            // Renumber units for clean display
-            surveyData.units = surveyData.units.map((u, index) => ({
-                ...u,
-                unitNumber: index + 1
-            }));
-            renderForm();
-            saveSurvey();
-        }
-
-        window.toggleDetails = function(unitId) {
-            const unit = surveyData.units.find(u => u.id === unitId);
-            if (unit) {
-                unit.showDetails = !unit.showDetails;
-                // Only toggle the specific div for efficiency
-                const detailsDiv = document.getElementById(`unit-details-${unitId}`);
-                if (detailsDiv) {
-                    detailsDiv.classList.toggle('hidden', !unit.showDetails);
-                }
-            }
-        }
-        
-        /** Saves the current state of the form to Firestore. */
-        async function saveSurvey() {
-            if (!userId) {
-                console.error("Authentication not ready. Cannot save.");
-                alertUser("Please sign in to save your survey.", "bg-red-500");
-                return;
-            }
-
-            const siteNameInput = document.getElementById('site-name').value.trim();
-            if (!siteNameInput) {
-                alertUser("Please enter a Site Name before saving.", "bg-red-500");
-                return;
-            }
-
-            // 1. Update the main surveyData object from top-level inputs (NEW MAPPING)
-            surveyData.jobNo = document.getElementById('job-no').value;
-            surveyData.companyName = document.getElementById('company-name').value;
-            surveyData.viewRef = document.getElementById('view-ref').value;
-            surveyData.customerName = document.getElementById('customer-name').value;
-            surveyData.billTo = document.getElementById('bill-to').value;
-            surveyData.serviceAddress = document.getElementById('service-address').value;
-            surveyData.locationType = document.getElementById('location-type').value;
-            surveyData.nteLimit = parseFloat(document.getElementById('nte-limit').value) || null; // Parse as float or set to null
-            
-            // Existing fields
-            surveyData.siteName = siteNameInput;
-            surveyData.roofAccess = document.getElementById('roof-access').value;
-            surveyData.locationNotes = document.getElementById('location-notes').value; // SAVE NEW FIELD
-
-            // 2. Determine document reference (use currentSurveyId or generate new one)
-            if (!currentSurveyId) {
-                // If it's a brand new survey, create an ID based on name and timestamp
-                currentSurveyId = `survey-${Date.now()}`;
-            }
-
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/hvac_surveys`, currentSurveyId);
-
-            // 3. Prepare data for Firestore (cleanup)
-            const dataToSave = {
-                ...surveyData,
-                units: surveyData.units.map(unit => {
-                    // Remove temporary UI state property before saving
-                    const { showDetails, ...rest } = unit;
-                    return rest;
-                }),
-                lastUpdated: serverTimestamp()
-            };
-
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.textContent = 'Saving...';
-            saveBtn.disabled = true;
-
-            try {
-                await setDoc(docRef, dataToSave, { merge: true });
-                alertUser(`Survey "${surveyData.siteName}" saved successfully!`, "bg-green-500");
-                // Update the currentSurveyId to be persistent across sessions
-                currentSurveyId = docRef.id;
-            } catch (error) {
-                console.error("Error saving document: ", error);
-                alertUser("Error saving survey. See console for details.", "bg-red-500");
-            } finally {
-                saveBtn.textContent = 'Save Survey';
-                saveBtn.disabled = false;
-            }
-        }
-
-
-        // --- Survey Management (Load/New) ---
-
-        /** Fetches the list of all saved surveys for the current user. */
-        async function fetchSurveysList() {
-            if (!userId) return; // Prevent fetching if not signed in
-
-            const surveysRef = collection(db, `artifacts/${appId}/users/${userId}/hvac_surveys`);
-            // Query for the latest 10 surveys
-            const q = query(surveysRef, orderBy('lastUpdated', 'desc'), limit(10));
-
-            try {
-                const querySnapshot = await getDocs(q);
-                const surveysContainer = document.getElementById('surveys-container');
-                surveysContainer.innerHTML = ''; // Clear previous list
-                document.getElementById('no-surveys').classList.add('hidden');
-
-                if (querySnapshot.empty) {
-                    document.getElementById('no-surveys').classList.remove('hidden');
-                    return;
-                }
-
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated.seconds * 1000).toLocaleString() : 'N/A';
-                    const unitCount = data.units ? data.units.length : 0;
-
-                    const listItem = document.createElement('div');
-                    listItem.className = 'flex justify-between items-center p-3 bg-gray-100 rounded-lg border hover:bg-gray-200 cursor-pointer transition duration-150';
-                    listItem.onclick = () => loadSurvey(doc.id, data);
-                    listItem.innerHTML = `
-                        <div>
-                            <p class="font-semibold text-gray-800">${data.siteName || 'Unnamed Survey'}</p>
-                            <p class="text-xs text-gray-600">Units: ${unitCount} | Last Saved: ${lastUpdated}</p>
-                        </div>
-                        <span class="text-sky-600 text-sm font-medium">Load</span>
-                    `;
-                    surveysContainer.appendChild(listItem);
-                });
-
-            } catch (error) {
-                console.error("Error fetching surveys list: ", error);
-            }
-        }
-
-        /** Loads a specific survey into the form. */
-        window.loadSurvey = function(id, data) {
-            currentSurveyId = id;
-            
-            // Map the loaded data to the surveyData object, ensuring defaults/UI states are set
-            surveyData = {
-                // NEW FIELDS MAPPING
-                jobNo: data.jobNo || '',
-                companyName: data.companyName || 'Mechanical Temp',
-                viewRef: data.viewRef || '',
-                customerName: data.customerName || '',
-                billTo: data.billTo || '',
-                serviceAddress: data.serviceAddress || '',
-                locationType: data.locationType || 'Commercial',
-                nteLimit: data.nteLimit !== undefined ? data.nteLimit : null,
-
-                // Existing fields
-                siteName: data.siteName || '',
-                roofAccess: data.roofAccess || 'Yes',
-                locationNotes: data.locationNotes || '', // LOAD NEW FIELD
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ALPINE.JS LOGIC
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('hvacApp', () => ({
+                user: null,
+                isSaving: false,
+                showLoadModal: false,
+                showBreakdown: false,
+                currentDocId: null,
+                savedSurveys: [],
+                toast: { visible: false, message: '', type: 'success' },
+
+                // The Main Data Object
+                data: {
+                    jobNo: '',
+                    companyName: 'Mechanical Temp',
+                    viewRef: '',
+                    customerName: '',
+                    serviceAddress: '',
+                    siteName: '',
+                    roofAccess: 'Yes',
+                    locationNotes: '',
+                    units: []
+                },
+
+                init() {
+                    // Auth Listener
+                    onAuthStateChanged(auth, (u) => {
+                        this.user = u;
+                        if(u) this.fetchSurveys();
+                    });
+
+                    // Add one empty unit to start if empty
+                    if(this.data.units.length === 0) this.addUnit();
+                },
+
+                // --- ACTIONS ---
                 
-                // Map units, ensuring nested arrays and UI state are included
-                units: (data.units || []).map(unit => ({
-                    ...unit,
-                    id: unit.id || Date.now(),
-                    showDetails: false, // Default to collapsed on load
-                    requiresCoilClean: unit.requiresCoilClean || false,
-                    vavCount: unit.vavCount || 0,
-                    filters: unit.filters || [{ qty: 1, size: '' }],
-                    belts: unit.belts || [{ qty: 1, size: '' }],
-                    basePMCost: unit.basePMCost !== undefined ? unit.basePMCost : unit.price || 0,
-                    coilCleanerMaterial: unit.coilCleanerMaterial !== undefined ? unit.coilCleanerMaterial : unit.coilCleaner || 0,
-                }))
-            };
+                signIn() {
+                    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => this.showToast(e.message, 'error'));
+                },
 
-            renderForm();
-            closeSurveyList();
-        }
+                addUnit() {
+                    this.data.units.push({
+                        id: Date.now(),
+                        expanded: true,
+                        type: 'RTU',
+                        brand: '',
+                        model: '',
+                        serialNumber: '',
+                        tonnage: null,
+                        vavCount: 0,
+                        filters: [{qty:1, size:''}],
+                        belts: [{qty:1, size:''}],
+                        basePMCost: 0,
+                        coilCleanerMaterial: 0,
+                        additionalMaterial: 0,
+                        requiresCoilClean: false,
+                        notes: ''
+                    });
+                },
 
-        /** Starts a blank new survey. */
-        window.newSurvey = function() {
-            currentSurveyId = null;
-            surveyData = {
-                jobNo: '',
-                companyName: 'Mechanical Temp',
-                viewRef: '',
-                customerName: '',
-                billTo: '',
-                serviceAddress: '',
-                locationType: 'Commercial',
-                nteLimit: null,
-                siteName: '',
-                roofAccess: 'Yes',
-                locationNotes: '', // RESET NEW FIELD
-                units: []
-            };
-            renderForm();
-            closeSurveyList();
-            document.getElementById('job-no').focus();
-        }
+                removeUnit(index) {
+                    if(confirm("Delete this unit?")) {
+                        this.data.units.splice(index, 1);
+                    }
+                },
 
-        window.openSurveyList = function() {
-            fetchSurveysList();
-            document.getElementById('survey-list-modal').classList.remove('hidden');
-        }
+                resetForm() {
+                    if(confirm("Clear current form? Unsaved changes will be lost.")) {
+                        this.currentDocId = null;
+                        this.data.jobNo = '';
+                        this.data.customerName = '';
+                        this.data.serviceAddress = '';
+                        this.data.siteName = '';
+                        this.data.units = [];
+                        this.addUnit();
+                    }
+                },
 
-        window.closeSurveyList = function() {
-            document.getElementById('survey-list-modal').classList.add('hidden');
-        }
+                // --- CALCULATIONS (Computed Logic) ---
 
-        // --- UI Feedback (Custom Alert) ---
+                calculateUnitTotal(unit) {
+                    // This is just a helper for display on the card header
+                    // Doesn't include global trip fees, just unit specific costs
+                    let cost = (unit.basePMCost || 0) + (unit.coilCleanerMaterial || 0) + (unit.additionalMaterial || 0);
+                    // Add VAV logic
+                    cost += (unit.vavCount || 0) * 15;
+                    // Add Coil Clean Labor logic
+                    if (unit.requiresCoilClean) {
+                        cost += (unit.tonnage >= 10) ? 60 : 45;
+                    }
+                    return cost;
+                },
 
-        function alertUser(message, bgColor) {
-            const container = document.getElementById('app');
-            let alertDiv = document.getElementById('custom-alert');
+                get totals() {
+                    let t = { unitPM: 0, vav: 0, coilLabor: 0, materials: 0 };
+                    
+                    this.data.units.forEach(u => {
+                        t.unitPM += (u.basePMCost || 0);
+                        t.vav += (u.vavCount || 0) * 15;
+                        t.materials += (u.coilCleanerMaterial || 0) + (u.additionalMaterial || 0);
+                        
+                        if(u.requiresCoilClean) {
+                            // Default to lower tier if tonnage is null/0
+                            let ton = parseFloat(u.tonnage) || 0;
+                            t.coilLabor += (ton >= 10 ? 60 : 45);
+                        }
+                    });
+                    return t;
+                },
 
-            if (!alertDiv) {
-                alertDiv = document.createElement('div');
-                alertDiv.id = 'custom-alert';
-                alertDiv.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl transition-opacity duration-300 opacity-0';
-                container.appendChild(alertDiv);
-            }
+                get grandTotal() {
+                    const baseTrip = 430;
+                    return baseTrip + this.totals.unitPM + this.totals.vav + this.totals.coilLabor + this.totals.materials;
+                },
 
-            alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl transition-opacity duration-300 ${bgColor} text-white`;
-            alertDiv.textContent = message;
+                formatCurrency(val) {
+                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+                },
 
-            // Show the alert
-            setTimeout(() => {
-                alertDiv.style.opacity = '1';
-            }, 10);
+                // --- FIREBASE OPS ---
 
-            // Hide the alert after 3 seconds
-            setTimeout(() => {
-                alertDiv.style.opacity = '0';
-            }, 3000);
-        }
+                async saveSurvey() {
+                    if(!this.data.siteName) return this.showToast("Site Name is required", 'error');
+                    
+                    this.isSaving = true;
+                    try {
+                        if (!this.currentDocId) this.currentDocId = `survey-${Date.now()}`;
+                        
+                        // We filter out UI-only state (like 'expanded') before saving if we wanted to be strict,
+                        // but saving it is fine for restoring state.
+                        const docRef = doc(db, `artifacts/${firebaseConfig.appId.split(':')[1]}/users/${this.user.uid}/hvac_surveys`, this.currentDocId);
+                        
+                        await setDoc(docRef, {
+                            ...this.data, // Spread data object
+                            lastUpdated: serverTimestamp()
+                        }, { merge: true });
 
-        // --- Firebase Initialization and Auth ---
+                        this.showToast("Saved Successfully!");
+                    } catch (e) {
+                        console.error(e);
+                        this.showToast("Error saving data", 'error');
+                    } finally {
+                        this.isSaving = false;
+                    }
+                },
 
-        async function initFirebase() {
-            // Check if Firebase config is available (either environment or fallback)
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing.");
-                document.getElementById('user-info').textContent = 'Error: Firebase configuration missing.';
-                return;
-            }
+                async fetchSurveys() {
+                    try {
+                        const q = query(
+                            collection(db, `artifacts/${firebaseConfig.appId.split(':')[1]}/users/${this.user.uid}/hvac_surveys`),
+                            orderBy('lastUpdated', 'desc'),
+                            limit(10)
+                        );
+                        const querySnapshot = await getDocs(q);
+                        this.savedSurveys = [];
+                        querySnapshot.forEach((doc) => {
+                            this.savedSurveys.push({ id: doc.id, ...doc.data() });
+                        });
+                        if(this.savedSurveys.length > 0) this.showLoadModal = true;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                },
 
-            // setLogLevel('debug'); // Uncomment for debugging
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+                loadSurvey(survey) {
+                    this.currentDocId = survey.id;
+                    // Deep copy to break reference
+                    let loadedData = JSON.parse(JSON.stringify(survey));
+                    // Cleanup internal fields
+                    delete loadedData.id;
+                    delete loadedData.lastUpdated;
+                    
+                    // Assign to data
+                    this.data = loadedData;
+                    this.showLoadModal = false;
+                    this.showToast("Survey Loaded");
+                },
 
-            const userInfoEl = document.getElementById('user-info');
-            const spinner = document.getElementById('loading-spinner');
-            const signInBtn = document.getElementById('google-sign-in-btn');
-            const surveyForm = document.getElementById('survey-form');
-            const authOverlay = document.getElementById('auth-overlay');
-
-            // 1. Initial Authentication Logic:
-            try {
-                // We prioritize the Canvas token if available
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    // Skip signInAnonymously if there is no Canvas token to avoid the admin-restricted-operation error
-                    console.log("No initial token. User must sign in via Google.");
+                showToast(msg, type = 'success') {
+                    this.toast.message = msg;
+                    this.toast.type = type;
+                    this.toast.visible = true;
+                    setTimeout(() => this.toast.visible = false, 3000);
                 }
-            } catch (error) {
-                // Log and ignore the restricted operation error if it occurs during initial sign-in
-                if (error.code !== 'auth/admin-restricted-operation') {
-                     console.error("Initial Authentication error:", error);
-                }
-            }
-            
-            // Render the form once initially so the element IDs exist.
-            renderForm();
-
-
-            // 2. Set up Auth State Listener
-            onAuthStateChanged(auth, (user) => {
-                spinner.style.display = 'none'; // Hide spinner
-
-                if (user && !user.isAnonymous) {
-                    // User is signed in (via Google)
-                    userId = user.uid;
-                    userInfoEl.innerHTML = `<span class="text-green-600 font-semibold">Signed in as:</span> ${user.email}`;
-                    signInBtn.classList.add('hidden');
-                    surveyForm.style.filter = 'none';
-                    authOverlay.classList.add('hidden');
-                    openSurveyList();
-
-                } else {
-                    // User is either signed out, or only signed in anonymously (which is insufficient for persistent storage)
-                    userId = null;
-                    userInfoEl.textContent = 'Please sign in to save and load surveys.';
-                    signInBtn.classList.remove('hidden');
-                    // Blur and overlay the form until the user signs in with Google
-                    surveyForm.style.filter = 'blur(4px)';
-                    authOverlay.classList.remove('hidden');
-                }
-            });
-        }
-
-        // Initialize the app when the page loads
-        window.onload = initFirebase;
+            }));
+        });
     </script>
 </body>
 </html>

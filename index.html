@@ -80,6 +80,22 @@
         const db = firebase.firestore();
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+        // --- COMMON DATA ---
+        const COMMON_BRANDS = ["Carrier", "Trane", "Lennox", "York", "Daikin", "Rheem", "Ruud", "Goodman", "American Standard", "AAON", "Mitsubishi", "McQuay", "Bryant", "Heil"];
+        
+        const COMMON_FILTERS = [
+            "16x20x1", "16x25x1", "20x20x1", "20x25x1", "14x20x1", "14x25x1", 
+            "16x20x2", "16x25x2", "20x20x2", "20x25x2", "24x24x2", 
+            "16x20x4", "16x25x4", "20x20x4", "20x25x4", "24x24x4"
+        ];
+        
+        const COMMON_BELTS = [
+            "A28", "A30", "A32", "A34", "A36", "A38", "A40", "A42", "A44", "A46", "A48", "A50", "A52", "A54", "A56", "A58", "A60",
+            "B30", "B32", "B34", "B36", "B38", "B40", "B42", "B44", "B46", "B48", "B50", "B52", "B54", "B56", "B58", "B60",
+            "AX32", "AX34", "AX36", "AX38", "AX40", "AX42", "AX46", "AX48", "AX50",
+            "BX34", "BX36", "BX38", "BX40", "BX42", "BX44", "BX46", "BX48", "BX50"
+        ];
+
         // --- COMPONENTS ---
 
         const Card = ({ children, className = "" }) => (
@@ -102,6 +118,208 @@
                 <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`}>
                     {children}
                 </button>
+            );
+        };
+
+        // --- CREATABLE SELECT COMPONENT ---
+        const CreatableSelect = ({ options, value, onChange, placeholder, className }) => {
+            const [isCustom, setIsCustom] = useState(!options.includes(value) && value !== "");
+
+            // If the value comes in and it's not in the list (and not empty), ensure we show custom input
+            useEffect(() => {
+                if (value && !options.includes(value)) {
+                    setIsCustom(true);
+                }
+            }, [value, options]);
+
+            const handleSelectChange = (e) => {
+                if (e.target.value === "__ADD_NEW__") {
+                    setIsCustom(true);
+                    onChange(""); 
+                } else {
+                    onChange(e.target.value);
+                }
+            };
+
+            if (isCustom) {
+                return (
+                    <div className="flex gap-1 w-full">
+                        <input 
+                            type="text" 
+                            className={className} 
+                            value={value} 
+                            onChange={(e) => onChange(e.target.value)} 
+                            placeholder={`Custom ${placeholder}`}
+                            autoFocus
+                        />
+                        <button 
+                            onClick={() => { setIsCustom(false); onChange(""); }}
+                            className="px-2 py-1 text-xs bg-slate-200 hover:bg-slate-300 rounded text-slate-600"
+                            title="Back to list"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <select 
+                    className={className} 
+                    value={value} 
+                    onChange={handleSelectChange}
+                >
+                    <option value="">{placeholder || "Select..."}</option>
+                    {options.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                    <option disabled>──────────</option>
+                    <option value="__ADD_NEW__" className="font-bold text-blue-600">+ Add New {placeholder}</option>
+                </select>
+            );
+        };
+
+        // --- UNIT CARD COMPONENT ---
+        const UnitCard = ({ unit, updateUnit, updateNestedUnit, addItemToUnit, removeNestedItem, deleteUnit, handlePhotoUpload }) => {
+            const [expanded, setExpanded] = useState(true);
+
+            return (
+                <Card className="mb-6 border-l-4 border-l-blue-600">
+                    <div className="p-4 bg-slate-50 border-b flex justify-between items-center cursor-pointer" onClick={() => setExpanded(!expanded)}>
+                        <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-lg text-slate-800">{unit.tag || 'New Unit'}</h3>
+                            <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{unit.tonnage} Ton</span>
+                            {unit.driveType === 'Direct' && <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">Direct Drive</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); deleteUnit(unit.id); }} className="p-2 text-red-500 hover:bg-red-50 rounded"><Icons.Trash2/></button>
+                            {expanded ? <Icons.ChevronUp/> : <Icons.ChevronDown/>}
+                        </div>
+                    </div>
+
+                    {expanded && (
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Settings/> Unit Specs</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-medium text-slate-500">Brand</label>
+                                        <CreatableSelect 
+                                            className="w-full p-2 border rounded" 
+                                            options={COMMON_BRANDS} 
+                                            value={unit.brand} 
+                                            onChange={(val) => updateUnit(unit.id, 'brand', val)} 
+                                            placeholder="Brand" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-slate-500">Model #</label>
+                                        <input type="text" className="w-full p-2 border rounded" value={unit.model} onChange={(e) => updateUnit(unit.id, 'model', e.target.value)} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-medium text-slate-500">Serial #</label>
+                                        <input type="text" className="w-full p-2 border rounded" value={unit.serial} onChange={(e) => updateUnit(unit.id, 'serial', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-slate-500">Tonnage</label>
+                                        <input type="number" className="w-full p-2 border rounded" value={unit.tonnage} onChange={(e) => updateUnit(unit.id, 'tonnage', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-slate-500">Refrigerant</label>
+                                        <select className="w-full p-2 border rounded" value={unit.refrigerant} onChange={(e) => updateUnit(unit.id, 'refrigerant', e.target.value)}>
+                                            <option>R-410A</option>
+                                            <option>R-22</option>
+                                            <option>R-407C</option>
+                                            <option>R-32</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-medium text-slate-500">Area Served</label>
+                                        <input type="text" className="w-full p-2 border rounded" placeholder="e.g. Sales Floor" value={unit.areaServed} onChange={(e) => updateUnit(unit.id, 'areaServed', e.target.value)} />
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block text-xs font-medium text-slate-500 mb-2">Photos (Nameplate, Issues)</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {unit.photos.map((p, i) => (
+                                            <img key={i} src={p} className="w-16 h-16 object-cover rounded border" alt="Unit" />
+                                        ))}
+                                        <label className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-slate-300 rounded cursor-pointer hover:bg-slate-50">
+                                            <Icons.Camera className="text-slate-400" />
+                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload(unit.id, e)} />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Wrench/> Drive & Belts</h4>
+                                        <div className="flex text-xs bg-slate-100 rounded p-1">
+                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Belt')} className={`px-2 py-1 rounded ${unit.driveType === 'Belt' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Belt</button>
+                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Direct')} className={`px-2 py-1 rounded ${unit.driveType === 'Direct' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Direct</button>
+                                        </div>
+                                    </div>
+                                    {unit.driveType === 'Belt' && (
+                                        <div className="bg-slate-50 p-3 rounded space-y-2">
+                                            {unit.belts.map((belt, idx) => (
+                                                <div key={idx} className="flex gap-2 items-center">
+                                                    <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={belt.qty} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'qty', e.target.value)} />
+                                                    <div className="flex-1">
+                                                        <CreatableSelect 
+                                                            className="w-full p-1 border rounded text-sm"
+                                                            options={COMMON_BELTS}
+                                                            value={belt.size}
+                                                            onChange={(val) => updateNestedUnit(unit.id, 'belts', idx, 'size', val)}
+                                                            placeholder="Size (e.g. A42)"
+                                                        />
+                                                    </div>
+                                                    {unit.belts.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'belts', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
+                                                </div>
+                                            ))}
+                                            <button onClick={() => addItemToUnit(unit.id, 'belts', { size: '', qty: 1 })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Belt Size</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.CheckCircle/> Filters</h4>
+                                    <div className="bg-slate-50 p-3 rounded space-y-2">
+                                        {unit.filters.map((filter, idx) => (
+                                            <div key={idx} className="flex gap-2 items-center">
+                                                <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={filter.qty} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'qty', e.target.value)} />
+                                                <div className="flex-1">
+                                                    <CreatableSelect 
+                                                        className="w-full p-1 border rounded text-sm"
+                                                        options={COMMON_FILTERS}
+                                                        value={filter.size}
+                                                        onChange={(val) => updateNestedUnit(unit.id, 'filters', idx, 'size', val)}
+                                                        placeholder="Size (e.g. 20x20x2)"
+                                                    />
+                                                </div>
+                                                {unit.filters.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'filters', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
+                                            </div>
+                                        ))}
+                                        <button onClick={() => addItemToUnit(unit.id, 'filters', { size: '', qty: 1, type: 'Pleated' })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Filter Size</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.AlertTriangle/> Access & Labor</h4>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div className="col-span-2">
+                                            <label className="text-xs text-slate-500">Access Notes</label>
+                                            <input type="text" placeholder="Ladder, hatch..." className="w-full p-2 border rounded text-sm" value={unit.accessNotes} onChange={(e) => updateUnit(unit.id, 'accessNotes', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-500">Extra Hrs</label>
+                                            <input type="number" step="0.5" className="w-full p-2 border rounded text-sm" value={unit.laborMultiplier} onChange={(e) => updateUnit(unit.id, 'laborMultiplier', e.target.value)} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </Card>
             );
         };
 
@@ -380,126 +598,7 @@
             const prices = calculatePricing();
 
             // --- RENDER HELPERS ---
-            const UnitCard = ({ unit }) => {
-                const [expanded, setExpanded] = useState(true);
-
-                return (
-                    <Card className="mb-6 border-l-4 border-l-blue-600">
-                        <div className="p-4 bg-slate-50 border-b flex justify-between items-center cursor-pointer" onClick={() => setExpanded(!expanded)}>
-                            <div className="flex items-center gap-3">
-                                <h3 className="font-bold text-lg text-slate-800">{unit.tag || 'New Unit'}</h3>
-                                <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{unit.tonnage} Ton</span>
-                                {unit.driveType === 'Direct' && <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">Direct Drive</span>}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={(e) => { e.stopPropagation(); deleteUnit(unit.id); }} className="p-2 text-red-500 hover:bg-red-50 rounded"><Icons.Trash2/></button>
-                                {expanded ? <Icons.ChevronUp/> : <Icons.ChevronDown/>}
-                            </div>
-                        </div>
-
-                        {expanded && (
-                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Settings/> Unit Specs</h4>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Brand</label>
-                                            <input type="text" className="w-full p-2 border rounded" placeholder="Carrier..." value={unit.brand} onChange={(e) => updateUnit(unit.id, 'brand', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Model #</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={unit.model} onChange={(e) => updateUnit(unit.id, 'model', e.target.value)} />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-slate-500">Serial #</label>
-                                            <input type="text" className="w-full p-2 border rounded" value={unit.serial} onChange={(e) => updateUnit(unit.id, 'serial', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Tonnage</label>
-                                            <input type="number" className="w-full p-2 border rounded" value={unit.tonnage} onChange={(e) => updateUnit(unit.id, 'tonnage', e.target.value)} />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs font-medium text-slate-500">Refrigerant</label>
-                                            <select className="w-full p-2 border rounded" value={unit.refrigerant} onChange={(e) => updateUnit(unit.id, 'refrigerant', e.target.value)}>
-                                                <option>R-410A</option>
-                                                <option>R-22</option>
-                                                <option>R-407C</option>
-                                                <option>R-32</option>
-                                                <option>Other</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-slate-500">Area Served</label>
-                                            <input type="text" className="w-full p-2 border rounded" placeholder="e.g. Sales Floor" value={unit.areaServed} onChange={(e) => updateUnit(unit.id, 'areaServed', e.target.value)} />
-                                        </div>
-                                    </div>
-                                    <div className="mt-4">
-                                        <label className="block text-xs font-medium text-slate-500 mb-2">Photos (Nameplate, Issues)</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {unit.photos.map((p, i) => (
-                                                <img key={i} src={p} className="w-16 h-16 object-cover rounded border" alt="Unit" />
-                                            ))}
-                                            <label className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-slate-300 rounded cursor-pointer hover:bg-slate-50">
-                                                <Icons.Camera className="text-slate-400" />
-                                                <input type="file" accept="image/*" className="hidden" onChange={(e) => handlePhotoUpload(unit.id, e)} />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Wrench/> Drive & Belts</h4>
-                                            <div className="flex text-xs bg-slate-100 rounded p-1">
-                                                <button onClick={() => updateUnit(unit.id, 'driveType', 'Belt')} className={`px-2 py-1 rounded ${unit.driveType === 'Belt' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Belt</button>
-                                                <button onClick={() => updateUnit(unit.id, 'driveType', 'Direct')} className={`px-2 py-1 rounded ${unit.driveType === 'Direct' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Direct</button>
-                                            </div>
-                                        </div>
-                                        {unit.driveType === 'Belt' && (
-                                            <div className="bg-slate-50 p-3 rounded space-y-2">
-                                                {unit.belts.map((belt, idx) => (
-                                                    <div key={idx} className="flex gap-2 items-center">
-                                                        <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={belt.qty} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'qty', e.target.value)} />
-                                                        <input type="text" placeholder="Size (e.g. A42)" className="flex-1 p-1 border rounded text-sm" value={belt.size} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'size', e.target.value)} />
-                                                        {unit.belts.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'belts', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
-                                                    </div>
-                                                ))}
-                                                <button onClick={() => addItemToUnit(unit.id, 'belts', { size: '', qty: 1 })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Belt Size</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.CheckCircle/> Filters</h4>
-                                        <div className="bg-slate-50 p-3 rounded space-y-2">
-                                            {unit.filters.map((filter, idx) => (
-                                                <div key={idx} className="flex gap-2 items-center">
-                                                    <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={filter.qty} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'qty', e.target.value)} />
-                                                    <input type="text" placeholder="Size (e.g. 20x20x2)" className="flex-1 p-1 border rounded text-sm" value={filter.size} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'size', e.target.value)} />
-                                                    {unit.filters.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'filters', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
-                                                </div>
-                                            ))}
-                                            <button onClick={() => addItemToUnit(unit.id, 'filters', { size: '', qty: 1, type: 'Pleated' })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Filter Size</button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-2"><Icons.AlertTriangle/> Access & Labor</h4>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-slate-500">Access Notes</label>
-                                                <input type="text" placeholder="Ladder, hatch..." className="w-full p-2 border rounded text-sm" value={unit.accessNotes} onChange={(e) => updateUnit(unit.id, 'accessNotes', e.target.value)} />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs text-slate-500">Extra Hrs</label>
-                                                <input type="number" step="0.5" className="w-full p-2 border rounded text-sm" value={unit.laborMultiplier} onChange={(e) => updateUnit(unit.id, 'laborMultiplier', e.target.value)} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </Card>
-                );
-            };
+            // UnitCard has been moved out of here
 
             // --- PRINT VIEW ---
             if (showPrintView) {
@@ -653,7 +752,20 @@
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center mb-2"><h2 className="text-xl font-bold text-slate-700">Unit Inventory ({units.length})</h2><Button onClick={addUnit} variant="primary"><Icons.Plus/> Add Unit</Button></div>
                                     {units.length === 0 && <div className="text-center p-12 bg-white rounded-lg border-2 border-dashed border-slate-300 text-slate-400"><Icons.Settings className="mx-auto mb-2 opacity-50"/><p>No units added yet. Tap "Add Unit" to begin.</p></div>}
-                                    {units.map((unit) => <UnitCard key={unit.id} unit={unit} />)}
+                                    
+                                    {units.map((unit) => (
+                                        <UnitCard 
+                                            key={unit.id} 
+                                            unit={unit} 
+                                            updateUnit={updateUnit}
+                                            updateNestedUnit={updateNestedUnit}
+                                            addItemToUnit={addItemToUnit}
+                                            removeNestedItem={removeNestedItem}
+                                            deleteUnit={deleteUnit}
+                                            handlePhotoUpload={handlePhotoUpload}
+                                        />
+                                    ))}
+                                    
                                     {units.length > 0 && <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('customer')}>&larr; Back</Button><Button onClick={() => setActiveTab('supplies')}>Next: Supplies &rarr;</Button></div>}
                                 </div>
                             )}

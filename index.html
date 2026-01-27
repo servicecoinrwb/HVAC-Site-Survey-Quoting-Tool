@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HVACPro Survey Tool</title>
+    <title>Site Survey Tool</title>
     <link rel="icon" href="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" />
     
     <!-- Tailwind CSS -->
@@ -29,6 +29,7 @@
             body { background: white; }
             .break-inside-avoid { break-inside: avoid; }
             .break-before-page { break-before: page; }
+            textarea { border: none !important; resize: none !important; overflow: hidden !important; }
         }
     </style>
 </head>
@@ -57,7 +58,8 @@
             LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
             Cloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>,
             Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
-            Loader: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg>
+            Loader: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg>,
+            RefreshCw: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
         };
 
         const { useState, useEffect } = React;
@@ -105,7 +107,7 @@
             </div>
         );
 
-        const Button = ({ children, onClick, variant = "primary", className = "", type="button", disabled = false }) => {
+        const Button = ({ children, onClick, variant = "primary", className = "", type="button", disabled = false, title }) => {
             const baseStyle = "px-4 py-2 rounded-md font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
             const variants = {
                 primary: "bg-blue-600 text-white hover:bg-blue-700",
@@ -116,7 +118,7 @@
                 google: "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
             };
             return (
-                <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`} title={title}>
                     {children}
                 </button>
             );
@@ -343,7 +345,8 @@
                 contactName: '',
                 phone: '',
                 email: '',
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toISOString().split('T')[0],
+                proposalMessage: ''
             });
 
             const [units, setUnits] = useState([]);
@@ -450,7 +453,7 @@
 
             const loadSurvey = (survey) => {
                 if (confirm("Loading this survey will overwrite your current unsaved changes. Continue?")) {
-                    setCustomer(survey.customer);
+                    setCustomer({ ...survey.customer, proposalMessage: survey.customer.proposalMessage || '' });
                     setUnits(survey.units || []);
                     setPricingConfig(survey.pricingConfig);
                     setSupplies(survey.supplies);
@@ -482,7 +485,8 @@
                         contactName: '',
                         phone: '',
                         email: '',
-                        date: new Date().toISOString().split('T')[0]
+                        date: new Date().toISOString().split('T')[0],
+                        proposalMessage: ''
                     });
                     setSupplies({ coilCleanerQty: 0, rags: 0, grease: 0 });
                 }
@@ -598,13 +602,8 @@
             const totals = calculateTotals();
             const prices = calculatePricing();
 
-            // --- RENDER HELPERS ---
-            // UnitCard has been moved out of here
-
-            // --- PRINT VIEW ---
-            if (showPrintView) {
-                const today = new Date().toLocaleDateString();
-                const proposalMessage = `Dear ${customer.contactName || 'Valued Customer'},
+            const getDefaultProposalMessage = () => {
+                return `Dear ${customer.contactName || 'Valued Customer'},
 
 Thank you for giving HVACPro the opportunity to survey the HVAC equipment at ${customer.name || customer.address || 'your facility'}. 
 
@@ -613,17 +612,33 @@ Our team has completed a thorough inspection of your ${units.length} units. Base
 Below you will find a detailed inventory of your equipment, a summary of the required materials (filters, belts, etc.), and our proposed service agreement options.
 
 We look forward to partnering with you to maintain a comfortable and safe environment for your building.`;
+            };
+
+            // --- RENDER HELPERS ---
+            // UnitCard has been moved out of here
+
+            // --- PRINT VIEW ---
+            if (showPrintView) {
+                const messageToDisplay = customer.proposalMessage || getDefaultProposalMessage();
 
                 return (
                     <div className="bg-white min-h-screen text-slate-800 p-8 font-sans max-w-5xl mx-auto">
                         <div className="fixed top-4 right-4 no-print flex gap-2">
+                            {customer.proposalMessage && (
+                                <Button onClick={() => setCustomer({...customer, proposalMessage: ''})} variant="outline" title="Reset to default text">
+                                    <Icons.RefreshCw/> Reset Message
+                                </Button>
+                            )}
                             <Button onClick={() => window.print()} variant="primary"><Icons.Printer/> Print/PDF</Button>
                             <Button onClick={() => setShowPrintView(false)} variant="secondary">Close</Button>
                         </div>
                         <div className="border-b-2 border-slate-800 pb-4 mb-8 flex justify-between items-end">
-                            <div>
-                                <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-900">Site Survey & Proposal</h1>
-                                <p className="text-slate-500 mt-1">Commercial HVAC Assessment</p>
+                            <div className="flex items-center gap-4">
+                                <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Company Logo" className="h-16 w-auto object-contain" />
+                                <div>
+                                    <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-900">Site Survey & Proposal</h1>
+                                    <p className="text-slate-500 mt-1">Commercial HVAC Assessment</p>
+                                </div>
                             </div>
                             <div className="text-right">
                                 <h2 className="text-xl font-bold">{customer.name}</h2>
@@ -633,9 +648,14 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
                             </div>
                         </div>
 
-                        {/* THANK YOU MESSAGE */}
-                        <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-700">
-                            {proposalMessage}
+                        {/* EDITABLE THANK YOU MESSAGE */}
+                        <div className="mb-8">
+                            <textarea 
+                                className="w-full h-64 p-6 bg-slate-50 border border-slate-200 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                                value={messageToDisplay}
+                                onChange={(e) => setCustomer({...customer, proposalMessage: e.target.value})}
+                            ></textarea>
+                            <p className="text-xs text-slate-400 mt-1 text-right no-print">You can edit this message directly before printing.</p>
                         </div>
 
                         <div className="mb-8 p-4 bg-slate-100 rounded border border-slate-200">

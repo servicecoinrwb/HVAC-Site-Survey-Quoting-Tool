@@ -3,26 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Survey Tool</title>
-    <link rel="icon" href="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" />
-    
+    <title>Mechanical Temp - Site Survey Tool</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
+
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Firebase Compat Library (Easier for single file HTML) -->
+    <!-- Firebase Compat Library -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
     <style>
+        :root {
+            --mt-navy: #1A2332;
+            --mt-navy-deep: #0F1822;
+            --mt-cyan: #38BDF8;
+            --mt-cyan-deep: #0EA5E9;
+        }
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -38,7 +43,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- ICONS (SVG Replacements for Lucide) ---
+        // --- ICONS ---
         const Icons = {
             Camera: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>,
             Trash2: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
@@ -50,6 +55,7 @@
             Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
             CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
             AlertTriangle: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>,
+            AlertOctagon: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
             Printer: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
             ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
             ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
@@ -59,12 +65,14 @@
             Cloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>,
             Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
             Loader: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/></svg>,
-            RefreshCw: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+            RefreshCw: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
+            Flag: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>,
+            Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         };
 
         const { useState, useEffect } = React;
 
-        // --- FIREBASE CONFIG ---
+        // --- FIREBASE CONFIG (preserved from original) ---
         const firebaseConfig = {
             apiKey: "AIzaSyB3nwP6M7veF9eD9hWW5Wy1zzv1pnnaU2M",
             authDomain: "hvac-site-survey-quoting-tool.firebaseapp.com",
@@ -75,7 +83,6 @@
             measurementId: "G-69DC64LV90"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -83,15 +90,28 @@
         const db = firebase.firestore();
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+        // --- MECHANICAL TEMP BRAND ---
+        const COMPANY = {
+            name: "Mechanical Temp",
+            tagline: "Commercial HVAC  •  Service  •  Controls",
+            phone: "(313) 282-4758",
+            email: "info@mechanicaltemp.com",
+            website: "mechanicaltemp.com",
+            address: "23093 Telegraph Rd, Southfield, MI",
+            // SVG wordmark - matches the actual logo style
+            logoSvgWhite: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70"><text x="0" y="32" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="26" letter-spacing="2" fill="white">MECHANICAL</text><text x="0" y="60" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="26" letter-spacing="2" fill="white">TEMP</text></svg>`,
+            logoSvgDark: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 70"><text x="0" y="32" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="26" letter-spacing="2" fill="#1A2332">MECHANICAL</text><text x="0" y="60" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="26" letter-spacing="2" fill="#1A2332">TEMP</text></svg>`
+        };
+
         // --- COMMON DATA ---
         const COMMON_BRANDS = ["Carrier", "Trane", "Lennox", "York", "Daikin", "Rheem", "Ruud", "Goodman", "American Standard", "AAON", "Mitsubishi", "McQuay", "Bryant", "Heil"];
-        
+
         const COMMON_FILTERS = [
-            "16x20x1", "16x25x1", "20x20x1", "20x25x1", "14x20x1", "14x25x1", 
-            "16x20x2", "16x25x2", "20x20x2", "20x25x2", "24x24x2", 
+            "16x20x1", "16x25x1", "20x20x1", "20x25x1", "14x20x1", "14x25x1",
+            "16x20x2", "16x25x2", "20x20x2", "20x25x2", "24x24x2",
             "16x20x4", "16x25x4", "20x20x4", "20x25x4", "24x24x4"
         ];
-        
+
         const COMMON_BELTS = [
             "A28", "A30", "A32", "A34", "A36", "A38", "A40", "A42", "A44", "A46", "A48", "A50", "A52", "A54", "A56", "A58", "A60",
             "B30", "B32", "B34", "B36", "B38", "B40", "B42", "B44", "B46", "B48", "B50", "B52", "B54", "B56", "B58", "B60",
@@ -99,8 +119,15 @@
             "BX34", "BX36", "BX38", "BX40", "BX42", "BX44", "BX46", "BX48", "BX50"
         ];
 
-        // --- COMPONENTS ---
+        // Condition severity → color mapping
+        const CONDITION_STYLES = {
+            'Good': { bg: 'bg-emerald-100', text: 'text-emerald-800', badge: 'bg-emerald-500' },
+            'Fair': { bg: 'bg-yellow-100', text: 'text-yellow-800', badge: 'bg-yellow-500' },
+            'Poor': { bg: 'bg-orange-100', text: 'text-orange-800', badge: 'bg-orange-500' },
+            'End of Life': { bg: 'bg-red-100', text: 'text-red-800', badge: 'bg-red-600' }
+        };
 
+        // --- COMPONENTS ---
         const Card = ({ children, className = "" }) => (
             <div className={`bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden ${className}`}>
                 {children}
@@ -110,12 +137,13 @@
         const Button = ({ children, onClick, variant = "primary", className = "", type="button", disabled = false, title }) => {
             const baseStyle = "px-4 py-2 rounded-md font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
             const variants = {
-                primary: "bg-blue-600 text-white hover:bg-blue-700",
+                primary: "bg-[#0EA5E9] text-white hover:bg-[#0284C7]",
                 secondary: "bg-slate-100 text-slate-700 hover:bg-slate-200",
                 danger: "bg-red-50 text-red-600 hover:bg-red-100",
                 success: "bg-emerald-600 text-white hover:bg-emerald-700",
                 outline: "border border-slate-300 text-slate-600 hover:bg-slate-50",
-                google: "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
+                google: "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50",
+                navy: "bg-[#1A2332] text-white hover:bg-[#0F1822]"
             };
             return (
                 <button type={type} onClick={onClick} disabled={disabled} className={`${baseStyle} ${variants[variant]} ${className}`} title={title}>
@@ -124,21 +152,17 @@
             );
         };
 
-        // --- CREATABLE SELECT COMPONENT ---
         const CreatableSelect = ({ options, value, onChange, placeholder, className }) => {
             const [isCustom, setIsCustom] = useState(!options.includes(value) && value !== "");
 
-            // If the value comes in and it's not in the list (and not empty), ensure we show custom input
             useEffect(() => {
-                if (value && !options.includes(value)) {
-                    setIsCustom(true);
-                }
+                if (value && !options.includes(value)) setIsCustom(true);
             }, [value, options]);
 
             const handleSelectChange = (e) => {
                 if (e.target.value === "__ADD_NEW__") {
                     setIsCustom(true);
-                    onChange(""); 
+                    onChange("");
                 } else {
                     onChange(e.target.value);
                 }
@@ -147,52 +171,44 @@
             if (isCustom) {
                 return (
                     <div className="flex gap-1 w-full">
-                        <input 
-                            type="text" 
-                            className={className} 
-                            value={value} 
-                            onChange={(e) => onChange(e.target.value)} 
-                            placeholder={`Custom ${placeholder}`}
-                            autoFocus
-                        />
-                        <button 
-                            onClick={() => { setIsCustom(false); onChange(""); }}
-                            className="px-2 py-1 text-xs bg-slate-200 hover:bg-slate-300 rounded text-slate-600"
-                            title="Back to list"
-                        >
-                            ✕
-                        </button>
+                        <input type="text" className={className} value={value} onChange={(e) => onChange(e.target.value)} placeholder={`Custom ${placeholder}`} autoFocus />
+                        <button onClick={() => { setIsCustom(false); onChange(""); }} className="px-2 py-1 text-xs bg-slate-200 hover:bg-slate-300 rounded text-slate-600" title="Back to list">✕</button>
                     </div>
                 );
             }
 
             return (
-                <select 
-                    className={className} 
-                    value={value} 
-                    onChange={handleSelectChange}
-                >
+                <select className={className} value={value} onChange={handleSelectChange}>
                     <option value="">{placeholder || "Select..."}</option>
-                    {options.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                    ))}
+                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     <option disabled>──────────</option>
-                    <option value="__ADD_NEW__" className="font-bold text-blue-600">+ Add New {placeholder}</option>
+                    <option value="__ADD_NEW__" className="font-bold text-[#0EA5E9]">+ Add New {placeholder}</option>
                 </select>
             );
         };
 
-        // --- UNIT CARD COMPONENT ---
+        // --- UNIT CARD ---
         const UnitCard = ({ unit, updateUnit, updateNestedUnit, addItemToUnit, removeNestedItem, deleteUnit, handlePhotoUpload }) => {
             const [expanded, setExpanded] = useState(true);
+            const condStyle = CONDITION_STYLES[unit.condition] || CONDITION_STYLES['Good'];
 
             return (
-                <Card className="mb-6 border-l-4 border-l-blue-600">
+                <Card className={`mb-6 border-l-4 ${unit.needsImmediateAttention ? 'border-l-red-600' : 'border-l-[#0EA5E9]'}`}>
                     <div className="p-4 bg-slate-50 border-b flex justify-between items-center cursor-pointer" onClick={() => setExpanded(!expanded)}>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                             <h3 className="font-bold text-lg text-slate-800">{unit.tag || 'New Unit'}</h3>
-                            <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{unit.tonnage} Ton</span>
+                            <span className="text-sm px-2 py-1 bg-cyan-100 text-cyan-800 rounded-full">{unit.tonnage} Ton</span>
                             {unit.driveType === 'Direct' && <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">Direct Drive</span>}
+                            {unit.condition && (
+                                <span className={`text-xs px-2 py-1 rounded-full font-semibold ${condStyle.bg} ${condStyle.text}`}>
+                                    {unit.condition}
+                                </span>
+                            )}
+                            {unit.needsImmediateAttention && (
+                                <span className="text-xs px-2 py-1 bg-red-600 text-white rounded-full font-bold flex items-center gap-1">
+                                    <Icons.AlertOctagon/> URGENT
+                                </span>
+                            )}
                         </div>
                         <div className="flex items-center gap-2">
                             <button onClick={(e) => { e.stopPropagation(); deleteUnit(unit.id); }} className="p-2 text-red-500 hover:bg-red-50 rounded"><Icons.Trash2/></button>
@@ -206,20 +222,18 @@
                                 <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Settings/> Unit Specs</h4>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
+                                        <label className="text-xs font-medium text-slate-500">Tag / ID</label>
+                                        <input type="text" className="w-full p-2 border rounded" value={unit.tag} onChange={(e) => updateUnit(unit.id, 'tag', e.target.value)} />
+                                    </div>
+                                    <div>
                                         <label className="text-xs font-medium text-slate-500">Brand</label>
-                                        <CreatableSelect 
-                                            className="w-full p-2 border rounded" 
-                                            options={COMMON_BRANDS} 
-                                            value={unit.brand} 
-                                            onChange={(val) => updateUnit(unit.id, 'brand', val)} 
-                                            placeholder="Brand" 
-                                        />
+                                        <CreatableSelect className="w-full p-2 border rounded" options={COMMON_BRANDS} value={unit.brand} onChange={(val) => updateUnit(unit.id, 'brand', val)} placeholder="Brand" />
                                     </div>
                                     <div>
                                         <label className="text-xs font-medium text-slate-500">Model #</label>
                                         <input type="text" className="w-full p-2 border rounded" value={unit.model} onChange={(e) => updateUnit(unit.id, 'model', e.target.value)} />
                                     </div>
-                                    <div className="col-span-2">
+                                    <div>
                                         <label className="text-xs font-medium text-slate-500">Serial #</label>
                                         <input type="text" className="w-full p-2 border rounded" value={unit.serial} onChange={(e) => updateUnit(unit.id, 'serial', e.target.value)} />
                                     </div>
@@ -230,11 +244,7 @@
                                     <div>
                                         <label className="text-xs font-medium text-slate-500">Refrigerant</label>
                                         <select className="w-full p-2 border rounded" value={unit.refrigerant} onChange={(e) => updateUnit(unit.id, 'refrigerant', e.target.value)}>
-                                            <option>R-410A</option>
-                                            <option>R-22</option>
-                                            <option>R-407C</option>
-                                            <option>R-32</option>
-                                            <option>Other</option>
+                                            <option>R-410A</option><option>R-22</option><option>R-407C</option><option>R-32</option><option>Other</option>
                                         </select>
                                     </div>
                                     <div className="col-span-2">
@@ -242,6 +252,38 @@
                                         <input type="text" className="w-full p-2 border rounded" placeholder="e.g. Sales Floor" value={unit.areaServed} onChange={(e) => updateUnit(unit.id, 'areaServed', e.target.value)} />
                                     </div>
                                 </div>
+
+                                {/* NEW: Condition + Immediate Attention */}
+                                <div className="border-t pt-4 mt-4">
+                                    <h4 className="font-semibold text-slate-700 flex items-center gap-2 mb-3"><Icons.Flag/> Condition Assessment</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-xs font-medium text-slate-500">Condition Rating</label>
+                                            <select className="w-full p-2 border rounded" value={unit.condition} onChange={(e) => updateUnit(unit.id, 'condition', e.target.value)}>
+                                                <option value="Good">Good</option>
+                                                <option value="Fair">Fair</option>
+                                                <option value="Poor">Poor</option>
+                                                <option value="End of Life">End of Life</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-medium text-slate-500">Est. Age (Years)</label>
+                                            <input type="number" className="w-full p-2 border rounded" placeholder="e.g. 12" value={unit.age || ''} onChange={(e) => updateUnit(unit.id, 'age', e.target.value)} />
+                                        </div>
+                                    </div>
+                                    <label className="flex items-center gap-2 mt-3 p-2 bg-red-50 border border-red-200 rounded cursor-pointer hover:bg-red-100">
+                                        <input type="checkbox" checked={unit.needsImmediateAttention || false} onChange={(e) => updateUnit(unit.id, 'needsImmediateAttention', e.target.checked)} className="w-4 h-4" />
+                                        <span className="text-sm font-semibold text-red-700 flex items-center gap-1"><Icons.AlertOctagon/> Needs Immediate Attention</span>
+                                    </label>
+                                    <textarea
+                                        className="w-full p-2 border rounded text-sm mt-3"
+                                        rows="2"
+                                        placeholder="Condition notes (visible on printed report)..."
+                                        value={unit.conditionNotes || ''}
+                                        onChange={(e) => updateUnit(unit.id, 'conditionNotes', e.target.value)}
+                                    />
+                                </div>
+
                                 <div className="mt-4">
                                     <label className="block text-xs font-medium text-slate-500 mb-2">Photos (Nameplate, Issues)</label>
                                     <div className="flex flex-wrap gap-2">
@@ -255,13 +297,14 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
                                         <h4 className="font-semibold text-slate-700 flex items-center gap-2"><Icons.Wrench/> Drive & Belts</h4>
                                         <div className="flex text-xs bg-slate-100 rounded p-1">
-                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Belt')} className={`px-2 py-1 rounded ${unit.driveType === 'Belt' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Belt</button>
-                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Direct')} className={`px-2 py-1 rounded ${unit.driveType === 'Direct' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>Direct</button>
+                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Belt')} className={`px-2 py-1 rounded ${unit.driveType === 'Belt' ? 'bg-white shadow text-[#0EA5E9]' : 'text-slate-500'}`}>Belt</button>
+                                            <button onClick={() => updateUnit(unit.id, 'driveType', 'Direct')} className={`px-2 py-1 rounded ${unit.driveType === 'Direct' ? 'bg-white shadow text-[#0EA5E9]' : 'text-slate-500'}`}>Direct</button>
                                         </div>
                                     </div>
                                     {unit.driveType === 'Belt' && (
@@ -270,18 +313,12 @@
                                                 <div key={idx} className="flex gap-2 items-center">
                                                     <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={belt.qty} onChange={(e) => updateNestedUnit(unit.id, 'belts', idx, 'qty', e.target.value)} />
                                                     <div className="flex-1">
-                                                        <CreatableSelect 
-                                                            className="w-full p-1 border rounded text-sm"
-                                                            options={COMMON_BELTS}
-                                                            value={belt.size}
-                                                            onChange={(val) => updateNestedUnit(unit.id, 'belts', idx, 'size', val)}
-                                                            placeholder="Size (e.g. A42)"
-                                                        />
+                                                        <CreatableSelect className="w-full p-1 border rounded text-sm" options={COMMON_BELTS} value={belt.size} onChange={(val) => updateNestedUnit(unit.id, 'belts', idx, 'size', val)} placeholder="Size (e.g. A42)" />
                                                     </div>
                                                     {unit.belts.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'belts', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
                                                 </div>
                                             ))}
-                                            <button onClick={() => addItemToUnit(unit.id, 'belts', { size: '', qty: 1 })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Belt Size</button>
+                                            <button onClick={() => addItemToUnit(unit.id, 'belts', { size: '', qty: 1 })} className="text-xs text-[#0EA5E9] font-medium hover:underline">+ Add Belt Size</button>
                                         </div>
                                     )}
                                 </div>
@@ -292,18 +329,12 @@
                                             <div key={idx} className="flex gap-2 items-center">
                                                 <input type="number" placeholder="Qty" className="w-16 p-1 border rounded text-sm" value={filter.qty} onChange={(e) => updateNestedUnit(unit.id, 'filters', idx, 'qty', e.target.value)} />
                                                 <div className="flex-1">
-                                                    <CreatableSelect 
-                                                        className="w-full p-1 border rounded text-sm"
-                                                        options={COMMON_FILTERS}
-                                                        value={filter.size}
-                                                        onChange={(val) => updateNestedUnit(unit.id, 'filters', idx, 'size', val)}
-                                                        placeholder="Size (e.g. 20x20x2)"
-                                                    />
+                                                    <CreatableSelect className="w-full p-1 border rounded text-sm" options={COMMON_FILTERS} value={filter.size} onChange={(val) => updateNestedUnit(unit.id, 'filters', idx, 'size', val)} placeholder="Size (e.g. 20x20x2)" />
                                                 </div>
                                                 {unit.filters.length > 1 && <button onClick={() => removeNestedItem(unit.id, 'filters', idx)} className="text-red-400 hover:text-red-600"><Icons.Trash2/></button>}
                                             </div>
                                         ))}
-                                        <button onClick={() => addItemToUnit(unit.id, 'filters', { size: '', qty: 1, type: 'Pleated' })} className="text-xs text-blue-600 font-medium hover:underline">+ Add Filter Size</button>
+                                        <button onClick={() => addItemToUnit(unit.id, 'filters', { size: '', qty: 1, type: 'Pleated' })} className="text-xs text-[#0EA5E9] font-medium hover:underline">+ Add Filter Size</button>
                                     </div>
                                 </div>
                                 <div>
@@ -326,11 +357,10 @@
             );
         };
 
-        function HVACSurveyApp() {
+        function MechanicalTempSurveyApp() {
             const [activeTab, setActiveTab] = useState('customer');
             const [showPrintView, setShowPrintView] = useState(false);
-            
-            // Auth & Data State
+
             const [user, setUser] = useState(null);
             const [currentSurveyId, setCurrentSurveyId] = useState(null);
             const [savedSurveys, setSavedSurveys] = useState([]);
@@ -338,87 +368,55 @@
             const [isSaving, setIsSaving] = useState(false);
             const [isLoadingData, setIsLoadingData] = useState(false);
 
-            // App Data State
             const [customer, setCustomer] = useState({
-                name: '',
-                address: '',
-                contactName: '',
-                phone: '',
-                email: '',
+                name: '', address: '', contactName: '', phone: '', email: '',
                 date: new Date().toISOString().split('T')[0],
                 proposalMessage: ''
             });
 
             const [units, setUnits] = useState([]);
-            
+
+            // NEW: Priority findings (separate from per-unit attention)
+            const [priorityFindings, setPriorityFindings] = useState([]);
+
             const [pricingConfig, setPricingConfig] = useState({
-                pricePerTon: 35,
-                laborRate: 125,
-                coilCleanerCost: 25,
-                filterMarkup: 1.5,
-                beltMarkup: 1.5,
-                tripCharge: 75,
-                taxRate: 0.06
+                pricePerTon: 35, laborRate: 125, coilCleanerCost: 25,
+                filterMarkup: 1.5, beltMarkup: 1.5, tripCharge: 75, taxRate: 0.06
             });
 
-            const [supplies, setSupplies] = useState({
-                coilCleanerQty: 0,
-                rags: 0,
-                grease: 0
-            });
+            const [supplies, setSupplies] = useState({ coilCleanerQty: 0, rags: 0, grease: 0 });
 
-            // --- AUTH LISTENERS ---
             useEffect(() => {
                 const unsubscribe = auth.onAuthStateChanged((currentUser) => {
                     setUser(currentUser);
-                    if (currentUser) {
-                        fetchSavedSurveys(currentUser.uid);
-                    } else {
-                        setSavedSurveys([]);
-                        setCurrentSurveyId(null);
-                    }
+                    if (currentUser) fetchSavedSurveys(currentUser.uid);
+                    else { setSavedSurveys([]); setCurrentSurveyId(null); }
                 });
                 return () => unsubscribe();
             }, []);
 
-            // --- FIREBASE ACTIONS ---
             const handleSignIn = async () => {
-                try {
-                    await auth.signInWithPopup(googleProvider);
-                } catch (error) {
-                    console.error("Error signing in", error);
-                    alert("Error signing in: " + error.message);
-                }
+                try { await auth.signInWithPopup(googleProvider); }
+                catch (error) { alert("Error signing in: " + error.message); }
             };
 
             const handleSignOut = async () => {
-                try {
-                    await auth.signOut();
-                } catch (error) {
-                    console.error("Error signing out", error);
-                }
+                try { await auth.signOut(); } catch (error) { console.error(error); }
             };
 
             const saveSurvey = async () => {
                 if (!user) return alert("Please sign in to save surveys.");
                 setIsSaving(true);
-                
                 const surveyData = {
-                    customer,
-                    units,
-                    pricingConfig,
-                    supplies,
+                    customer, units, priorityFindings, pricingConfig, supplies,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     userId: user.uid
                 };
-
                 try {
                     if (currentSurveyId) {
-                        // Update existing
                         await db.collection('users').doc(user.uid).collection('surveys').doc(currentSurveyId).update(surveyData);
                         alert("Survey updated successfully!");
                     } else {
-                        // Create new
                         const docRef = await db.collection('users').doc(user.uid).collection('surveys').add({
                             ...surveyData,
                             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -427,34 +425,24 @@
                         alert("New survey saved successfully!");
                     }
                     fetchSavedSurveys(user.uid);
-                } catch (error) {
-                    console.error("Error saving survey", error);
-                    alert("Error saving: " + error.message);
-                } finally {
-                    setIsSaving(false);
-                }
+                } catch (error) { alert("Error saving: " + error.message); }
+                finally { setIsSaving(false); }
             };
 
             const fetchSavedSurveys = async (uid) => {
                 setIsLoadingData(true);
                 try {
                     const snapshot = await db.collection('users').doc(uid).collection('surveys').orderBy('updatedAt', 'desc').get();
-                    const surveys = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    setSavedSurveys(surveys);
-                } catch (error) {
-                    console.error("Error fetching surveys", error);
-                } finally {
-                    setIsLoadingData(false);
-                }
+                    setSavedSurveys(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                } catch (error) { console.error(error); }
+                finally { setIsLoadingData(false); }
             };
 
             const loadSurvey = (survey) => {
                 if (confirm("Loading this survey will overwrite your current unsaved changes. Continue?")) {
                     setCustomer({ ...survey.customer, proposalMessage: survey.customer.proposalMessage || '' });
                     setUnits(survey.units || []);
+                    setPriorityFindings(survey.priorityFindings || []);
                     setPricingConfig(survey.pricingConfig);
                     setSupplies(survey.supplies);
                     setCurrentSurveyId(survey.id);
@@ -464,14 +452,12 @@
 
             const deleteSurvey = async (surveyId, e) => {
                 e.stopPropagation();
-                if (confirm("Are you sure you want to delete this saved survey? This cannot be undone.")) {
+                if (confirm("Delete this saved survey? This cannot be undone.")) {
                     try {
                         await db.collection('users').doc(user.uid).collection('surveys').doc(surveyId).delete();
                         if (currentSurveyId === surveyId) setCurrentSurveyId(null);
                         fetchSavedSurveys(user.uid);
-                    } catch (error) {
-                        console.error("Error deleting", error);
-                    }
+                    } catch (error) { console.error(error); }
                 }
             };
 
@@ -479,45 +465,24 @@
                 if (confirm("Start a new survey? Any unsaved changes will be lost.")) {
                     setCurrentSurveyId(null);
                     setUnits([]);
-                    setCustomer({
-                        name: '',
-                        address: '',
-                        contactName: '',
-                        phone: '',
-                        email: '',
-                        date: new Date().toISOString().split('T')[0],
-                        proposalMessage: ''
-                    });
+                    setPriorityFindings([]);
+                    setCustomer({ name: '', address: '', contactName: '', phone: '', email: '', date: new Date().toISOString().split('T')[0], proposalMessage: '' });
                     setSupplies({ coilCleanerQty: 0, rags: 0, grease: 0 });
                 }
             };
 
-            // --- APP HANDLERS ---
             const addUnit = () => {
                 const newUnit = {
-                    id: Date.now(),
-                    tag: `RTU-${units.length + 1}`,
-                    brand: '',
-                    model: '',
-                    serial: '',
-                    areaServed: '',
-                    tonnage: 0,
-                    refrigerant: 'R-410A',
-                    driveType: 'Belt',
-                    belts: [{ size: '', qty: 1 }],
-                    filters: [{ size: '', qty: 1, type: 'Pleated' }],
-                    condition: 'Good',
-                    accessNotes: '',
-                    laborMultiplier: 0,
-                    photos: [] 
+                    id: Date.now(), tag: `RTU-${units.length + 1}`, brand: '', model: '', serial: '',
+                    areaServed: '', tonnage: 0, refrigerant: 'R-410A', driveType: 'Belt',
+                    belts: [{ size: '', qty: 1 }], filters: [{ size: '', qty: 1, type: 'Pleated' }],
+                    condition: 'Good', age: '', conditionNotes: '', needsImmediateAttention: false,
+                    accessNotes: '', laborMultiplier: 0, photos: []
                 };
                 setUnits([...units, newUnit]);
             };
 
-            const updateUnit = (id, field, value) => {
-                setUnits(units.map(u => u.id === id ? { ...u, [field]: value } : u));
-            };
-
+            const updateUnit = (id, field, value) => setUnits(units.map(u => u.id === id ? { ...u, [field]: value } : u));
             const updateNestedUnit = (unitId, arrayName, index, field, value) => {
                 setUnits(units.map(u => {
                     if (u.id !== unitId) return u;
@@ -526,44 +491,37 @@
                     return { ...u, [arrayName]: newArray };
                 }));
             };
-
             const addItemToUnit = (unitId, arrayName, itemTemplate) => {
-                setUnits(units.map(u => {
-                    if (u.id !== unitId) return u;
-                    return { ...u, [arrayName]: [...u[arrayName], itemTemplate] };
-                }));
+                setUnits(units.map(u => u.id !== unitId ? u : { ...u, [arrayName]: [...u[arrayName], itemTemplate] }));
             };
-
             const removeNestedItem = (unitId, arrayName, index) => {
-                setUnits(units.map(u => {
-                    if (u.id !== unitId) return u;
-                    return { ...u, [arrayName]: u[arrayName].filter((_, i) => i !== index) };
-                }));
+                setUnits(units.map(u => u.id !== unitId ? u : { ...u, [arrayName]: u[arrayName].filter((_, i) => i !== index) }));
             };
-
             const deleteUnit = (id) => {
-                if(confirm("Are you sure you want to delete this unit?")) {
-                    setUnits(units.filter(u => u.id !== id));
-                }
+                if(confirm("Are you sure you want to delete this unit?")) setUnits(units.filter(u => u.id !== id));
             };
-
             const handlePhotoUpload = (id, e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setUnits(units.map(u => u.id === id ? { ...u, photos: [...u.photos, reader.result] } : u));
-                    };
+                    reader.onloadend = () => setUnits(units.map(u => u.id === id ? { ...u, photos: [...u.photos, reader.result] } : u));
                     reader.readAsDataURL(file);
                 }
             };
 
-            // --- CALCULATIONS ---
+            // Priority findings handlers
+            const addPriorityFinding = () => {
+                setPriorityFindings([...priorityFindings, { id: Date.now(), level: 'medium', text: '' }]);
+            };
+            const updatePriorityFinding = (id, field, value) => {
+                setPriorityFindings(priorityFindings.map(p => p.id === id ? { ...p, [field]: value } : p));
+            };
+            const removePriorityFinding = (id) => {
+                setPriorityFindings(priorityFindings.filter(p => p.id !== id));
+            };
+
             const calculateTotals = () => {
-                let totalTonnage = 0;
-                let totalFilters = {};
-                let totalBelts = {};
-                
+                let totalTonnage = 0, totalFilters = {}, totalBelts = {};
                 units.forEach(u => {
                     totalTonnage += parseFloat(u.tonnage) || 0;
                     u.filters.forEach(f => {
@@ -572,8 +530,7 @@
                     });
                     if (u.driveType === 'Belt') {
                         u.belts.forEach(b => {
-                            const key = b.size;
-                            if(key) totalBelts[key] = (totalBelts[key] || 0) + parseInt(b.qty || 0);
+                            if(b.size) totalBelts[b.size] = (totalBelts[b.size] || 0) + parseInt(b.qty || 0);
                         });
                     }
                 });
@@ -589,41 +546,48 @@
                 const estFilterCost = units.reduce((acc, u) => acc + (u.filters.reduce((s, f) => s + f.qty, 0) * 8), 0);
                 const estBeltCost = units.reduce((acc, u) => acc + (u.driveType === 'Belt' ? u.belts.reduce((s, b) => s + b.qty, 0) * 15 : 0), 0);
                 const costPerVisit = basePM + extraLaborCost + chemicalCost + (estFilterCost * pricingConfig.filterMarkup) + (estBeltCost * pricingConfig.beltMarkup) + pricingConfig.tripCharge;
-
                 return {
                     quarterly: (costPerVisit * 4).toFixed(2),
-                    semiAnnual: (costPerVisit * 2 * 1.05).toFixed(2), 
+                    semiAnnual: (costPerVisit * 2 * 1.05).toFixed(2),
                     annual: (costPerVisit * 1.10).toFixed(2),
-                    perVisit: costPerVisit.toFixed(2),
-                    breakdown: { basePM, extraLaborCost, materials: (estFilterCost * pricingConfig.filterMarkup) + (estBeltCost * pricingConfig.beltMarkup) + chemicalCost }
+                    perVisit: costPerVisit.toFixed(2)
                 };
             };
 
             const totals = calculateTotals();
             const prices = calculatePricing();
+            const urgentUnits = units.filter(u => u.needsImmediateAttention);
 
             const getDefaultProposalMessage = () => {
                 return `Dear ${customer.contactName || 'Valued Customer'},
 
-Thank you for giving HVACPro the opportunity to survey the HVAC equipment at ${customer.name || customer.address || 'your facility'}. 
+Thank you for the opportunity to survey the HVAC equipment at ${customer.name || customer.address || 'your facility'}.
 
-Our team has completed a thorough inspection of your ${units.length} units. Based on our findings, we have developed a comprehensive maintenance plan tailored to keep your systems running efficiently, extend their lifespan, and reduce unexpected breakdowns.
+Our team has completed a thorough inspection of your ${units.length} unit${units.length !== 1 ? 's' : ''}. Based on our findings, we have developed a comprehensive maintenance plan tailored to keep your systems running efficiently, extend their lifespan, and reduce unexpected breakdowns.
 
-Below you will find a detailed inventory of your equipment, a summary of the required materials (filters, belts, etc.), and our proposed service agreement options.
+${urgentUnits.length > 0 ? `Please note: ${urgentUnits.length} unit${urgentUnits.length !== 1 ? 's' : ''} on your property require${urgentUnits.length === 1 ? 's' : ''} immediate attention. These items are flagged in the report below and we recommend addressing them as soon as possible.
 
-We look forward to partnering with you to maintain a comfortable and safe environment for your building.`;
+` : ''}Below you will find a detailed inventory of your equipment, priority findings, a summary of required materials, and our proposed service agreement options.
+
+We're local, family-owned, and we answer the phone. Whenever you're ready to discuss next steps, give us a call.
+
+Sincerely,
+Brian
+${COMPANY.name}
+${COMPANY.phone}`;
             };
 
-            // --- RENDER HELPERS ---
-            // UnitCard has been moved out of here
-
-            // --- PRINT VIEW ---
+            // ============ PRINT VIEW ============
             if (showPrintView) {
                 const messageToDisplay = customer.proposalMessage || getDefaultProposalMessage();
+                const sortedPriorities = [...priorityFindings].sort((a, b) => {
+                    const order = { critical: 0, high: 1, medium: 2, low: 3 };
+                    return (order[a.level] || 4) - (order[b.level] || 4);
+                });
 
                 return (
                     <div className="bg-white min-h-screen text-slate-800 p-8 font-sans max-w-5xl mx-auto">
-                        <div className="fixed top-4 right-4 no-print flex gap-2">
+                        <div className="fixed top-4 right-4 no-print flex gap-2 z-50">
                             {customer.proposalMessage && (
                                 <Button onClick={() => setCustomer({...customer, proposalMessage: ''})} variant="outline" title="Reset to default text">
                                     <Icons.RefreshCw/> Reset Message
@@ -632,77 +596,170 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
                             <Button onClick={() => window.print()} variant="primary"><Icons.Printer/> Print/PDF</Button>
                             <Button onClick={() => setShowPrintView(false)} variant="secondary">Close</Button>
                         </div>
-                        <div className="border-b-2 border-slate-800 pb-4 mb-8 flex justify-between items-end">
-                            <div className="flex items-center gap-4">
-                                <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Company Logo" className="h-16 w-auto object-contain" />
+
+                        {/* HEADER with full Mechanical Temp branding */}
+                        <div className="border-b-4 border-[#0EA5E9] pb-4 mb-8 bg-[#1A2332] -mx-8 -mt-8 px-8 pt-8">
+                            <div className="flex justify-between items-start">
                                 <div>
-                                    <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-900">Site Survey & Proposal</h1>
-                                    <p className="text-slate-500 mt-1">Commercial HVAC Assessment</p>
+                                    <div className="text-white" style={{ lineHeight: '1' }}>
+                                        <div className="text-3xl font-bold tracking-wider">MECHANICAL</div>
+                                        <div className="text-3xl font-bold tracking-wider">TEMP</div>
+                                    </div>
+                                    <div className="text-[#38BDF8] text-sm mt-2 font-semibold">Site Survey & Maintenance Proposal</div>
+                                    <div className="text-slate-400 text-xs mt-1">{COMPANY.tagline}</div>
                                 </div>
-                            </div>
-                            <div className="text-right">
-                                <h2 className="text-xl font-bold">{customer.name}</h2>
-                                <p className="text-sm">{customer.address}</p>
-                                <p className="text-sm">{customer.contactName} | {customer.phone}</p>
-                                <p className="text-sm text-slate-400 mt-2">Date: {customer.date}</p>
+                                <div className="text-right text-white">
+                                    <div className="text-[#38BDF8] font-bold text-lg flex items-center gap-2 justify-end">
+                                        <Icons.Phone/> {COMPANY.phone}
+                                    </div>
+                                    <div className="text-slate-300 text-sm mt-1">{COMPANY.email}</div>
+                                    <div className="text-slate-300 text-sm">{COMPANY.website}</div>
+                                    <div className="text-slate-400 text-xs mt-2">Licensed • Insured • Local</div>
+                                    <div className="text-slate-400 text-xs">{COMPANY.address}</div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* EDITABLE THANK YOU MESSAGE */}
+                        {/* CUSTOMER BLOCK */}
+                        <div className="mb-8 grid grid-cols-2 gap-4 border-l-4 border-[#0EA5E9] pl-4">
+                            <div>
+                                <div className="text-xs uppercase text-slate-500 font-bold tracking-wide">Prepared For</div>
+                                <div className="text-xl font-bold text-slate-900 mt-1">{customer.name}</div>
+                                <div className="text-sm text-slate-600">{customer.address}</div>
+                                <div className="text-sm text-slate-600 mt-2">{customer.contactName}</div>
+                                <div className="text-sm text-slate-500">{customer.phone} • {customer.email}</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-xs uppercase text-slate-500 font-bold tracking-wide">Survey Date</div>
+                                <div className="text-lg font-bold text-slate-900 mt-1">
+                                    {customer.date ? new Date(customer.date + 'T12:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                                </div>
+                                <div className="text-xs text-slate-500 mt-2">Surveyor: Brian / {COMPANY.name}</div>
+                            </div>
+                        </div>
+
+                        {/* URGENT ATTENTION BANNER */}
+                        {urgentUnits.length > 0 && (
+                            <div className="mb-8 bg-red-50 border-2 border-red-500 rounded-lg p-4 break-inside-avoid">
+                                <div className="flex items-start gap-3">
+                                    <div className="text-red-600 mt-1"><Icons.AlertOctagon/></div>
+                                    <div className="flex-1">
+                                        <div className="font-bold text-red-800 text-lg uppercase tracking-wide">Items Requiring Immediate Attention</div>
+                                        <div className="text-sm text-red-700 mt-1">{urgentUnits.length} unit{urgentUnits.length !== 1 ? 's' : ''} flagged during this survey:</div>
+                                        <ul className="mt-3 space-y-2">
+                                            {urgentUnits.map(u => (
+                                                <li key={u.id} className="text-sm">
+                                                    <span className="font-bold text-red-900">{u.tag}</span>
+                                                    {u.areaServed && <span className="text-red-700"> ({u.areaServed})</span>}
+                                                    {u.conditionNotes && <span className="text-red-700"> — {u.conditionNotes}</span>}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PROPOSAL MESSAGE */}
                         <div className="mb-8">
-                            <textarea 
-                                className="w-full h-64 p-6 bg-slate-50 border border-slate-200 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                            <textarea
+                                className="w-full h-64 p-6 bg-slate-50 border border-slate-200 rounded-lg whitespace-pre-wrap leading-relaxed text-slate-700 focus:ring-2 focus:ring-[#38BDF8] outline-none"
                                 value={messageToDisplay}
                                 onChange={(e) => setCustomer({...customer, proposalMessage: e.target.value})}
                             ></textarea>
                             <p className="text-xs text-slate-400 mt-1 text-right no-print">You can edit this message directly before printing.</p>
                         </div>
 
+                        {/* PRIORITY FINDINGS */}
+                        {sortedPriorities.length > 0 && (
+                            <div className="mb-8 break-inside-avoid">
+                                <h3 className="font-bold text-lg mb-4 bg-[#1A2332] text-white p-2 flex items-center gap-2">
+                                    <Icons.Flag/> Priority Findings
+                                </h3>
+                                <div className="space-y-3">
+                                    {sortedPriorities.map(p => {
+                                        const levelStyle = {
+                                            critical: { bg: 'bg-red-600', text: 'CRITICAL' },
+                                            high: { bg: 'bg-orange-500', text: 'HIGH' },
+                                            medium: { bg: 'bg-[#0EA5E9]', text: 'MEDIUM' },
+                                            low: { bg: 'bg-slate-500', text: 'LOW' }
+                                        }[p.level] || { bg: 'bg-slate-500', text: p.level.toUpperCase() };
+                                        return (
+                                            <div key={p.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded border-l-4 border-slate-300">
+                                                <span className={`${levelStyle.bg} text-white text-xs px-2 py-1 rounded font-bold tracking-wide min-w-[70px] text-center`}>
+                                                    {levelStyle.text}
+                                                </span>
+                                                <div className="text-sm text-slate-700 flex-1">{p.text}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* EXECUTIVE SUMMARY */}
                         <div className="mb-8 p-4 bg-slate-100 rounded border border-slate-200">
                             <h3 className="font-bold text-lg mb-2 border-b border-slate-300 pb-1">Executive Summary</h3>
-                            <div className="grid grid-cols-4 gap-4 text-center">
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{units.length}</span><span className="text-xs uppercase text-slate-500">Total Units</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{totals.totalTonnage}</span><span className="text-xs uppercase text-slate-500">Total Tonnage</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{Object.values(totals.totalFilters).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Filters</span></div>
-                                <div className="p-2"><span className="block text-2xl font-bold text-blue-600">{Object.values(totals.totalBelts).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Belts</span></div>
+                            <div className="grid grid-cols-5 gap-4 text-center">
+                                <div className="p-2"><span className="block text-2xl font-bold text-[#0EA5E9]">{units.length}</span><span className="text-xs uppercase text-slate-500">Total Units</span></div>
+                                <div className="p-2"><span className="block text-2xl font-bold text-[#0EA5E9]">{totals.totalTonnage}</span><span className="text-xs uppercase text-slate-500">Total Tonnage</span></div>
+                                <div className="p-2"><span className="block text-2xl font-bold text-[#0EA5E9]">{Object.values(totals.totalFilters).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Filters</span></div>
+                                <div className="p-2"><span className="block text-2xl font-bold text-[#0EA5E9]">{Object.values(totals.totalBelts).reduce((a,b)=>a+b, 0)}</span><span className="text-xs uppercase text-slate-500">Total Belts</span></div>
+                                <div className="p-2"><span className={`block text-2xl font-bold ${urgentUnits.length > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{urgentUnits.length}</span><span className="text-xs uppercase text-slate-500">Urgent Items</span></div>
                             </div>
                         </div>
+
+                        {/* UNIT INVENTORY */}
                         <div className="mb-8">
-                            <h3 className="font-bold text-lg mb-4 bg-slate-800 text-white p-2">Unit Inventory</h3>
+                            <h3 className="font-bold text-lg mb-4 bg-[#1A2332] text-white p-2">Unit Inventory</h3>
                             <table className="w-full text-sm text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b-2 border-slate-300">
-                                        <th className="py-2">Tag</th>
-                                        <th className="py-2">Model/Serial</th>
-                                        <th className="py-2">Area</th>
-                                        <th className="py-2">Filters</th>
-                                        <th className="py-2">Belts</th>
-                                        <th className="py-2">Notes</th>
+                                    <tr className="border-b-2 border-slate-300 bg-slate-100">
+                                        <th className="py-2 px-2">Tag</th>
+                                        <th className="py-2 px-2">Model/Serial</th>
+                                        <th className="py-2 px-2">Area</th>
+                                        <th className="py-2 px-2">Condition</th>
+                                        <th className="py-2 px-2">Filters</th>
+                                        <th className="py-2 px-2">Belts</th>
+                                        <th className="py-2 px-2">Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {units.map((u, i) => (
-                                        <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 break-inside-avoid">
-                                            <td className="py-3 font-bold align-top">{u.tag}<br/><span className="text-xs font-normal text-slate-500">{u.brand} - {u.tonnage}T</span></td>
-                                            <td className="py-3 align-top"><div className="text-xs">M: {u.model}</div><div className="text-xs text-slate-500">S: {u.serial}</div></td>
-                                            <td className="py-3 align-top">{u.areaServed}</td>
-                                            <td className="py-3 align-top">{u.filters.map((f, fi) => <div key={fi}>{f.qty} x {f.size}</div>)}</td>
-                                            <td className="py-3 align-top">{u.driveType === 'Direct' ? 'Direct Drive' : u.belts.map((b, bi) => <div key={bi}>{b.qty} x {b.size}</div>)}</td>
-                                            <td className="py-3 align-top italic text-slate-500">{u.accessNotes}</td>
-                                        </tr>
-                                    ))}
+                                    {units.map((u, i) => {
+                                        const condStyle = CONDITION_STYLES[u.condition] || CONDITION_STYLES['Good'];
+                                        return (
+                                            <tr key={i} className={`border-b border-slate-100 break-inside-avoid ${u.needsImmediateAttention ? 'bg-red-50' : ''}`}>
+                                                <td className="py-3 px-2 font-bold align-top">
+                                                    {u.tag}
+                                                    {u.needsImmediateAttention && <span className="block text-[10px] text-red-600 font-bold mt-1">⚠ URGENT</span>}
+                                                    <br/><span className="text-xs font-normal text-slate-500">{u.brand} - {u.tonnage}T</span>
+                                                </td>
+                                                <td className="py-3 px-2 align-top"><div className="text-xs">M: {u.model}</div><div className="text-xs text-slate-500">S: {u.serial}</div>{u.age && <div className="text-xs text-slate-500">{u.age} yrs</div>}</td>
+                                                <td className="py-3 px-2 align-top">{u.areaServed}</td>
+                                                <td className="py-3 px-2 align-top">
+                                                    <span className={`text-xs px-2 py-1 rounded font-semibold ${condStyle.bg} ${condStyle.text}`}>
+                                                        {u.condition}
+                                                    </span>
+                                                    {u.conditionNotes && <div className="text-xs text-slate-600 italic mt-1">{u.conditionNotes}</div>}
+                                                </td>
+                                                <td className="py-3 px-2 align-top">{u.filters.map((f, fi) => <div key={fi}>{f.qty} x {f.size}</div>)}</td>
+                                                <td className="py-3 px-2 align-top">{u.driveType === 'Direct' ? 'Direct Drive' : u.belts.map((b, bi) => <div key={bi}>{b.qty} x {b.size}</div>)}</td>
+                                                <td className="py-3 px-2 align-top italic text-slate-500 text-xs">{u.accessNotes}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* MATERIALS SUMMARY */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 break-inside-avoid">
                             <div><h3 className="font-bold text-md mb-2 border-b border-slate-300 pb-1">Required Filters</h3><ul className="text-sm space-y-1">{Object.entries(totals.totalFilters).map(([size, qty]) => (<li key={size} className="flex justify-between border-b border-dashed border-slate-200 py-1"><span>{size}</span><span className="font-bold">{qty}</span></li>))}</ul></div>
                             <div><h3 className="font-bold text-md mb-2 border-b border-slate-300 pb-1">Required Belts</h3><ul className="text-sm space-y-1">{Object.entries(totals.totalBelts).map(([size, qty]) => (<li key={size} className="flex justify-between border-b border-dashed border-slate-200 py-1"><span>{size}</span><span className="font-bold">{qty}</span></li>))}</ul></div>
-                            
-                            {/* BULK SUPPLIES SUMMARY */}
                             <div>
                                 <h3 className="font-bold text-md mb-2 border-b border-slate-300 pb-1">Bulk Supplies</h3>
                                 <ul className="text-sm space-y-1">
-                                    {supplies.coilCleanerQty > 0 && (
+                                    {supplies.coilCleanerQty > 0 ? (
                                         <li className="flex justify-between border-b border-dashed border-slate-200 py-1">
                                             <span>Coil Cleaner</span>
                                             <div className="text-right">
@@ -710,46 +767,86 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
                                                 <span className="text-xs text-slate-500">${(supplies.coilCleanerQty * pricingConfig.coilCleanerCost).toFixed(2)}</span>
                                             </div>
                                         </li>
-                                    )}
-                                    {supplies.coilCleanerQty === 0 && <li className="text-slate-400 italic">No bulk supplies added.</li>}
+                                    ) : <li className="text-slate-400 italic">No bulk supplies added.</li>}
                                 </ul>
                             </div>
                         </div>
+
+                        {/* PRICING */}
                         <div className="mt-8 break-inside-avoid">
-                            <h3 className="font-bold text-lg mb-4 bg-slate-800 text-white p-2">Proposed Maintenance Agreements</h3>
+                            <h3 className="font-bold text-lg mb-4 bg-[#1A2332] text-white p-2">Proposed Maintenance Agreements</h3>
                             <div className="grid grid-cols-3 gap-4">
-                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Quarterly</h4><div className="text-3xl font-bold text-blue-700">${prices.quarterly}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
-                                <div className="border rounded-lg p-4 text-center border-blue-200 bg-blue-50 shadow-sm relative overflow-hidden"><div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] px-2 py-1">RECOMMENDED</div><h4 className="font-bold text-blue-800 mb-2">Semi-Annual</h4><div className="text-3xl font-bold text-blue-700">${prices.semiAnnual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
-                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Annual</h4><div className="text-3xl font-bold text-blue-700">${prices.annual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
+                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Quarterly</h4><div className="text-3xl font-bold text-[#1A2332]">${prices.quarterly}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
+                                <div className="border rounded-lg p-4 text-center border-[#38BDF8] bg-cyan-50 shadow-sm relative overflow-hidden"><div className="absolute top-0 right-0 bg-[#0EA5E9] text-white text-[10px] px-2 py-1">RECOMMENDED</div><h4 className="font-bold text-[#0EA5E9] mb-2">Semi-Annual</h4><div className="text-3xl font-bold text-[#1A2332]">${prices.semiAnnual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
+                                <div className="border rounded-lg p-4 text-center bg-slate-50"><h4 className="font-bold text-slate-600 mb-2">Annual</h4><div className="text-3xl font-bold text-[#1A2332]">${prices.annual}</div><p className="text-xs text-slate-400 mt-1">Total Annual Cost</p></div>
                             </div>
                         </div>
+
+                        {/* CLOSING / CTA */}
+                        <div className="mt-12 bg-[#1A2332] text-white rounded-lg p-6 break-inside-avoid relative overflow-hidden">
+                            <div className="absolute left-0 top-0 bottom-0 w-2 bg-[#38BDF8]"></div>
+                            <div className="grid grid-cols-2 gap-4 items-center">
+                                <div>
+                                    <div className="text-[#38BDF8] font-bold text-lg">Ready to talk about next steps?</div>
+                                    <div className="text-sm text-slate-300 mt-2 leading-relaxed">
+                                        This survey is complimentary — no obligation. Whenever you're ready to address any findings,
+                                        give us a call. We're local, we answer the phone, and we quote work upfront so there are no surprises.
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[#38BDF8] font-bold text-2xl">{COMPANY.phone}</div>
+                                    <div className="text-slate-400 text-sm">{COMPANY.email}</div>
+                                    <div className="text-slate-400 text-sm">{COMPANY.website}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* PHOTOS */}
                         {units.some(u => u.photos.length > 0) && (
                             <div className="mt-12 break-before-page">
                                 <h3 className="font-bold text-lg mb-4 border-b">Site Photos</h3>
                                 <div className="grid grid-cols-3 gap-4">
-                                    {units.map(u => u.photos.map((p, i) => (<div key={`${u.id}-${i}`} className="border rounded p-2"><img src={p} className="w-full h-48 object-cover rounded mb-2" /><p className="text-xs font-bold text-center">{u.tag} - {u.model}</p></div>)))}
+                                    {units.map(u => u.photos.map((p, i) => (
+                                        <div key={`${u.id}-${i}`} className="border rounded p-2">
+                                            <img src={p} className="w-full h-48 object-cover rounded mb-2" />
+                                            <p className="text-xs font-bold text-center">{u.tag} - {u.model}</p>
+                                        </div>
+                                    )))}
                                 </div>
                             </div>
                         )}
+
+                        {/* FOOTER on every printed page */}
+                        <div className="mt-12 pt-4 border-t-2 border-[#0EA5E9] text-center text-xs text-slate-500">
+                            <div className="font-semibold text-slate-700">{COMPANY.name} LLC</div>
+                            <div>{COMPANY.address} • {COMPANY.phone} • {COMPANY.website}</div>
+                        </div>
                     </div>
                 );
             }
 
-            // --- MAIN UI ---
+            // ============ MAIN UI ============
             return (
                 <div>
-                    <nav className="bg-slate-800 text-white p-4 sticky top-0 z-10 shadow-lg no-print">
+                    <nav className="bg-[#1A2332] text-white p-4 sticky top-0 z-10 shadow-lg no-print border-b-2 border-[#0EA5E9]">
                         <div className="max-w-4xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <img src="https://imageview.replit.app/objects/uploads/d16ab63e-1d1e-4b8f-863c-67e66e4894fc" alt="Logo" className="h-8 w-auto mr-2"/>
-                                <h1 className="font-bold text-lg tracking-tight hidden sm:block">HVAC<span className="text-blue-400">Pro</span> Survey</h1>
+                            <div className="flex items-center gap-3">
+                                <div className="text-white" style={{ lineHeight: '0.9' }}>
+                                    <div className="text-sm font-bold tracking-wider">MECHANICAL</div>
+                                    <div className="text-sm font-bold tracking-wider text-[#38BDF8]">TEMP</div>
+                                </div>
+                                <div className="h-8 w-px bg-slate-600"></div>
+                                <h1 className="font-bold text-sm tracking-tight hidden sm:block text-slate-300">Site Survey</h1>
                             </div>
                             <div className="flex items-center gap-2">
                                 {!user ? (
                                     <Button onClick={handleSignIn} variant="google" className="text-xs sm:text-sm py-1"><Icons.LogIn/> Sign In</Button>
                                 ) : (
                                     <div className="flex items-center gap-3">
-                                        <div className="flex flex-col items-end mr-2"><span className="text-xs text-blue-200 font-bold">{user.displayName || user.email}</span><button onClick={handleSignOut} className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1"><Icons.LogOut/> Sign Out</button></div>
+                                        <div className="flex flex-col items-end mr-2">
+                                            <span className="text-xs text-[#38BDF8] font-bold">{user.displayName || user.email}</span>
+                                            <button onClick={handleSignOut} className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1"><Icons.LogOut/> Sign Out</button>
+                                        </div>
                                         {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-slate-600" />}
                                         <div className="h-6 w-px bg-slate-600 mx-1"></div>
                                         <Button variant="success" onClick={saveSurvey} disabled={isSaving} className="text-xs sm:text-sm py-1">{isSaving ? <Icons.Loader className="animate-spin"/> : <Icons.Cloud/>} <span className="hidden sm:inline">Save</span></Button>
@@ -768,10 +865,10 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
                             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
                                 <div className="p-4 border-b flex justify-between items-center bg-slate-50"><h3 className="font-bold text-lg">Load Saved Survey</h3><button onClick={() => setShowLoadModal(false)} className="text-slate-400 hover:text-slate-600">✕</button></div>
                                 <div className="p-4 overflow-y-auto flex-1">
-                                    {isLoadingData ? <div className="flex justify-center p-8"><Icons.Loader className="animate-spin text-blue-600"/></div> : savedSurveys.length === 0 ? <p className="text-center text-slate-400 py-8">No saved surveys found.</p> : (
+                                    {isLoadingData ? <div className="flex justify-center p-8"><Icons.Loader className="animate-spin text-[#0EA5E9]"/></div> : savedSurveys.length === 0 ? <p className="text-center text-slate-400 py-8">No saved surveys found.</p> : (
                                         <div className="space-y-2">
                                             {savedSurveys.map(survey => (
-                                                <div key={survey.id} onClick={() => loadSurvey(survey)} className="border p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors flex justify-between items-center group">
+                                                <div key={survey.id} onClick={() => loadSurvey(survey)} className="border p-3 rounded-lg hover:bg-cyan-50 cursor-pointer transition-colors flex justify-between items-center group">
                                                     <div><div className="font-bold text-slate-800">{survey.customer.name || 'Untitled Survey'}</div><div className="text-xs text-slate-500">{survey.units?.length || 0} Units • Updated: {new Date(survey.updatedAt?.seconds * 1000).toLocaleDateString()}</div></div>
                                                     <button onClick={(e) => deleteSurvey(survey.id, e)} className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Icons.Trash2/></button>
                                                 </div>
@@ -785,21 +882,30 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
 
                     <div className="max-w-4xl mx-auto p-4">
                         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-print">
-                            {[{ id: 'customer', label: 'Customer', icon: Icons.Users }, { id: 'units', label: 'Units', icon: Icons.Settings }, { id: 'supplies', label: 'Supplies', icon: Icons.Wrench }, { id: 'totals', label: 'Totals & Price', icon: Icons.Calculator }].map(tab => (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:bg-white/50'}`}><tab.icon /> {tab.label}</button>
+                            {[
+                                { id: 'customer', label: 'Customer', icon: Icons.Users },
+                                { id: 'units', label: 'Units', icon: Icons.Settings },
+                                { id: 'priorities', label: 'Priority Findings', icon: Icons.Flag },
+                                { id: 'supplies', label: 'Supplies', icon: Icons.Wrench },
+                                { id: 'totals', label: 'Totals & Price', icon: Icons.Calculator }
+                            ].map(tab => (
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white shadow text-[#0EA5E9]' : 'text-slate-500 hover:bg-white/50'}`}>
+                                    <tab.icon /> {tab.label}
+                                    {tab.id === 'priorities' && priorityFindings.length > 0 && <span className="bg-[#0EA5E9] text-white text-xs px-2 rounded-full">{priorityFindings.length}</span>}
+                                </button>
                             ))}
                         </div>
 
                         <div className="space-y-6">
                             {activeTab === 'customer' && (
                                 <Card className="p-6">
-                                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Icons.Users className="text-blue-600"/> Customer Details</h2>
+                                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Icons.Users className="text-[#0EA5E9]"/> Customer Details</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Company / Building</label><input type="text" className="w-full p-2 border rounded" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} placeholder="e.g. Skyline Plaza" /></div>
-                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Address</label><input type="text" className="w-full p-2 border rounded" value={customer.address} onChange={e => setCustomer({...customer, address: e.target.value})} placeholder="1234 Airflow Lane" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Contact Name</label><input type="text" className="w-full p-2 border rounded" value={customer.contactName} onChange={e => setCustomer({...customer, contactName: e.target.value})} placeholder="John Doe" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Phone</label><input type="tel" className="w-full p-2 border rounded" value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} placeholder="(555) 123-4567" /></div>
-                                        <div><label className="block text-sm font-medium mb-1">Email</label><input type="email" className="w-full p-2 border rounded" value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} placeholder="john@example.com" /></div>
+                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Company / Building</label><input type="text" className="w-full p-2 border rounded" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} placeholder="e.g. Telegraph Plaza Office Building" /></div>
+                                        <div className="col-span-2"><label className="block text-sm font-medium mb-1">Address</label><input type="text" className="w-full p-2 border rounded" value={customer.address} onChange={e => setCustomer({...customer, address: e.target.value})} placeholder="Street, City, MI ZIP" /></div>
+                                        <div><label className="block text-sm font-medium mb-1">Contact Name</label><input type="text" className="w-full p-2 border rounded" value={customer.contactName} onChange={e => setCustomer({...customer, contactName: e.target.value})} placeholder="Property manager name" /></div>
+                                        <div><label className="block text-sm font-medium mb-1">Phone</label><input type="tel" className="w-full p-2 border rounded" value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} placeholder="(248) XXX-XXXX" /></div>
+                                        <div><label className="block text-sm font-medium mb-1">Email</label><input type="email" className="w-full p-2 border rounded" value={customer.email} onChange={e => setCustomer({...customer, email: e.target.value})} placeholder="contact@property.com" /></div>
                                         <div><label className="block text-sm font-medium mb-1">Survey Date</label><input type="date" className="w-full p-2 border rounded" value={customer.date} onChange={e => setCustomer({...customer, date: e.target.value})} /></div>
                                     </div>
                                     <div className="mt-6 flex justify-end"><Button onClick={() => setActiveTab('units')}>Next: Add Units &rarr;</Button></div>
@@ -808,24 +914,86 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
 
                             {activeTab === 'units' && (
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-center mb-2"><h2 className="text-xl font-bold text-slate-700">Unit Inventory ({units.length})</h2><Button onClick={addUnit} variant="primary"><Icons.Plus/> Add Unit</Button></div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h2 className="text-xl font-bold text-slate-700">Unit Inventory ({units.length})</h2>
+                                        <Button onClick={addUnit} variant="primary"><Icons.Plus/> Add Unit</Button>
+                                    </div>
                                     {units.length === 0 && <div className="text-center p-12 bg-white rounded-lg border-2 border-dashed border-slate-300 text-slate-400"><Icons.Settings className="mx-auto mb-2 opacity-50"/><p>No units added yet. Tap "Add Unit" to begin.</p></div>}
-                                    
+
+                                    {urgentUnits.length > 0 && (
+                                        <div className="bg-red-50 border-l-4 border-red-600 p-3 rounded">
+                                            <div className="flex items-center gap-2 text-red-800 font-semibold text-sm">
+                                                <Icons.AlertOctagon/> {urgentUnits.length} unit{urgentUnits.length !== 1 ? 's' : ''} flagged for immediate attention
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {units.map((unit) => (
-                                        <UnitCard 
-                                            key={unit.id} 
-                                            unit={unit} 
-                                            updateUnit={updateUnit}
-                                            updateNestedUnit={updateNestedUnit}
-                                            addItemToUnit={addItemToUnit}
-                                            removeNestedItem={removeNestedItem}
-                                            deleteUnit={deleteUnit}
-                                            handlePhotoUpload={handlePhotoUpload}
+                                        <UnitCard
+                                            key={unit.id} unit={unit}
+                                            updateUnit={updateUnit} updateNestedUnit={updateNestedUnit}
+                                            addItemToUnit={addItemToUnit} removeNestedItem={removeNestedItem}
+                                            deleteUnit={deleteUnit} handlePhotoUpload={handlePhotoUpload}
                                         />
                                     ))}
-                                    
-                                    {units.length > 0 && <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('customer')}>&larr; Back</Button><Button onClick={() => setActiveTab('supplies')}>Next: Supplies &rarr;</Button></div>}
+
+                                    {units.length > 0 && <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('customer')}>&larr; Back</Button><Button onClick={() => setActiveTab('priorities')}>Next: Priority Findings &rarr;</Button></div>}
                                 </div>
+                            )}
+
+                            {activeTab === 'priorities' && (
+                                <Card className="p-6">
+                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Icons.Flag className="text-[#0EA5E9]"/> Priority Findings</h2>
+                                    <p className="text-sm text-slate-500 mb-4">
+                                        Top-level findings that aren't tied to a specific unit (e.g. "No PM agreement in place", "Multiple filter sizes inconsistent across building").
+                                        Per-unit issues are handled in the Units tab via "Needs Immediate Attention" checkbox. Keep this list to 3-6 items max — these appear at the top of the report.
+                                    </p>
+
+                                    <div className="space-y-3 mt-4">
+                                        {priorityFindings.length === 0 && (
+                                            <div className="text-center p-8 border-2 border-dashed border-slate-300 rounded text-slate-400">
+                                                <Icons.Flag className="mx-auto mb-2 opacity-50"/>
+                                                <p>No priority findings yet. Click below to add one.</p>
+                                            </div>
+                                        )}
+                                        {priorityFindings.map(p => (
+                                            <div key={p.id} className="flex gap-2 items-start bg-slate-50 p-3 rounded">
+                                                <select
+                                                    value={p.level}
+                                                    onChange={(e) => updatePriorityFinding(p.id, 'level', e.target.value)}
+                                                    className="p-2 border rounded text-sm font-semibold w-28"
+                                                >
+                                                    <option value="critical">Critical</option>
+                                                    <option value="high">High</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="low">Low</option>
+                                                </select>
+                                                <textarea
+                                                    value={p.text}
+                                                    onChange={(e) => updatePriorityFinding(p.id, 'text', e.target.value)}
+                                                    placeholder="Describe the finding..."
+                                                    className="flex-1 p-2 border rounded text-sm"
+                                                    rows="2"
+                                                />
+                                                <button
+                                                    onClick={() => removePriorityFinding(p.id)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded"
+                                                >
+                                                    <Icons.Trash2/>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <Button onClick={addPriorityFinding} variant="outline" className="mt-4">
+                                        <Icons.Plus/> Add Priority Finding
+                                    </Button>
+
+                                    <div className="flex justify-between mt-6">
+                                        <Button variant="secondary" onClick={() => setActiveTab('units')}>&larr; Back</Button>
+                                        <Button onClick={() => setActiveTab('supplies')}>Next: Supplies &rarr;</Button>
+                                    </div>
+                                </Card>
                             )}
 
                             {activeTab === 'supplies' && (
@@ -842,23 +1010,23 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
                                             <div><label className="block text-xs font-bold text-slate-500 uppercase">Trip Charge</label><input type="number" className="w-full p-2 border rounded" value={pricingConfig.tripCharge} onChange={(e) => setPricingConfig({...pricingConfig, tripCharge: Number(e.target.value)})} /></div>
                                         </div>
                                     </Card>
-                                    <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('units')}>&larr; Back</Button><Button onClick={() => setActiveTab('totals')}>Next: Totals &rarr;</Button></div>
+                                    <div className="flex justify-between mt-6"><Button variant="secondary" onClick={() => setActiveTab('priorities')}>&larr; Back</Button><Button onClick={() => setActiveTab('totals')}>Next: Totals &rarr;</Button></div>
                                 </div>
                             )}
 
                             {activeTab === 'totals' && (
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Total Filters Needed</h3>{Object.keys(totals.totalFilters).length === 0 ? <p className="text-slate-400 italic">No filters recorded.</p> : <ul className="space-y-2">{Object.entries(totals.totalFilters).map(([size, qty]) => <li key={size} className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">{size}</span><span className="font-bold bg-blue-100 text-blue-800 px-2 rounded-full">{qty}</span></li>)}</ul>}</Card>
+                                        <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Total Filters Needed</h3>{Object.keys(totals.totalFilters).length === 0 ? <p className="text-slate-400 italic">No filters recorded.</p> : <ul className="space-y-2">{Object.entries(totals.totalFilters).map(([size, qty]) => <li key={size} className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">{size}</span><span className="font-bold bg-cyan-100 text-cyan-800 px-2 rounded-full">{qty}</span></li>)}</ul>}</Card>
                                         <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Total Belts Needed</h3>{Object.keys(totals.totalBelts).length === 0 ? <p className="text-slate-400 italic">No belts recorded.</p> : <ul className="space-y-2">{Object.entries(totals.totalBelts).map(([size, qty]) => <li key={size} className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">{size}</span><span className="font-bold bg-orange-100 text-orange-800 px-2 rounded-full">{qty}</span></li>)}</ul>}</Card>
                                         <Card className="p-4"><h3 className="font-bold text-slate-700 border-b pb-2 mb-2">Bulk Supplies</h3>{supplies.coilCleanerQty === 0 ? <p className="text-slate-400 italic">No bulk supplies.</p> : <ul className="space-y-2"><li className="flex justify-between bg-slate-50 p-2 rounded"><span className="font-mono text-sm">Coil Cleaner</span><div className="text-right"><span className="font-bold bg-emerald-100 text-emerald-800 px-2 rounded-full">{supplies.coilCleanerQty} Gal</span><div className="text-xs text-slate-500 mt-1">${(supplies.coilCleanerQty * pricingConfig.coilCleanerCost).toFixed(2)}</div></div></li></ul>}</Card>
                                     </div>
-                                    <Card className="p-6 bg-slate-800 text-white">
+                                    <Card className="p-6 bg-[#1A2332] text-white">
                                         <h2 className="text-xl font-bold mb-6">Estimated Maintenance Costs</h2>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Quarterly (4x)</div><div className="text-3xl font-bold text-green-400">${prices.quarterly}</div></div>
-                                            <div className="bg-slate-700 p-4 rounded-lg border-2 border-blue-500 relative"><div className="absolute top-0 right-0 bg-blue-500 text-xs px-2 py-0.5">Popular</div><div className="text-sm text-slate-300 mb-1">Semi-Annual (2x)</div><div className="text-3xl font-bold text-green-400">${prices.semiAnnual}</div></div>
-                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Annual (1x)</div><div className="text-3xl font-bold text-green-400">${prices.annual}</div></div>
+                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Quarterly (4x)</div><div className="text-3xl font-bold text-[#38BDF8]">${prices.quarterly}</div></div>
+                                            <div className="bg-slate-700 p-4 rounded-lg border-2 border-[#38BDF8] relative"><div className="absolute top-0 right-0 bg-[#0EA5E9] text-xs px-2 py-0.5">Popular</div><div className="text-sm text-slate-300 mb-1">Semi-Annual (2x)</div><div className="text-3xl font-bold text-[#38BDF8]">${prices.semiAnnual}</div></div>
+                                            <div className="bg-slate-700 p-4 rounded-lg"><div className="text-sm text-slate-300 mb-1">Annual (1x)</div><div className="text-3xl font-bold text-[#38BDF8]">${prices.annual}</div></div>
                                         </div>
                                     </Card>
                                     <div className="flex justify-center mt-8 pb-8"><Button onClick={() => setShowPrintView(true)} variant="success" className="px-8 py-4 text-lg shadow-xl"><Icons.FileText/> Generate Report & Proposal</Button></div>
@@ -871,7 +1039,7 @@ We look forward to partnering with you to maintain a comfortable and safe enviro
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<HVACSurveyApp />);
+        root.render(<MechanicalTempSurveyApp />);
     </script>
 </body>
 </html>

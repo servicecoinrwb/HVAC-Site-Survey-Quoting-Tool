@@ -622,9 +622,11 @@
                 const estBeltCost = units.reduce((acc, u) => acc + (u.driveType === 'Belt' ? u.belts.reduce((s, b) => s + b.qty, 0) * 15 : 0), 0);
                 const costPerVisit = basePM + extraLaborCost + chemicalCost + (estFilterCost * pricingConfig.filterMarkup) + (estBeltCost * pricingConfig.beltMarkup) + pricingConfig.tripCharge;
                 return {
-                    quarterly: (costPerVisit * 4).toFixed(2),
-                    semiAnnual: (costPerVisit * 2 * 1.05).toFixed(2),
-                    annual: (costPerVisit * 1.10).toFixed(2),
+                    // pricingFixed: visits/yr × per-visit cost; per-visit premium scales UP as visits decrease
+                    // because fewer visits = less ongoing relationship value = standalone-visit pricing
+                    quarterly:  (costPerVisit * 4 * 1.00).toFixed(2),    // 4 visits @ base rate (best per-visit value)
+                    semiAnnual: (costPerVisit * 2 * 1.15).toFixed(2),    // 2 visits @ +15% (less frequent = higher per-visit)
+                    annual:     (costPerVisit * 1 * 1.30).toFixed(2),    // 1 visit @ +30% (one-shot premium)
                     perVisit: costPerVisit.toFixed(2)
                 };
             };
@@ -634,11 +636,11 @@
             const urgentUnits = units.filter(u => u.needsImmediateAttention);
 
             const getDefaultProposalMessage = () => {
-                return `Dear ${customer.contactName || 'Valued Customer'},
+                return `Dear ${(customer.contactName && customer.contactName.trim().split(' ')[0]) || (customer.name && !customer.name.match(/^[A-Z]+\s*#/) && customer.name.split(',')[0].split(' ')[0]) || 'Valued Customer'},
 
-Thank you for the opportunity to survey the HVAC equipment at ${customer.name || customer.address || 'your facility'}.
+Thank you for the opportunity to survey the HVAC equipment at ${(customer.name && customer.name.match(/#|LLC|Inc\.|Corp|Co\.|Center|Plaza|Mall|Store|Restaurant|Cafe|Bar|Shop|Salon|Hotel|Office/i)) ? customer.name : 'your home'}.
 
-Our team has completed a thorough inspection of your ${units.length} unit${units.length !== 1 ? 's' : ''}. Based on our findings, we have developed a comprehensive maintenance plan tailored to keep your systems running efficiently, extend their lifespan, and reduce unexpected breakdowns.
+Our team has completed a thorough inspection of ${units.length === 0 ? 'your equipment' : (units.length === 1 ? 'your unit' : 'your ' + units.length + ' units')}. Based on our findings, we have developed a comprehensive maintenance plan tailored to keep your systems running efficiently, extend their lifespan, and reduce unexpected breakdowns.
 
 ${urgentUnits.length > 0 ? `Please note: ${urgentUnits.length} unit${urgentUnits.length !== 1 ? 's' : ''} on your property require${urgentUnits.length === 1 ? 's' : ''} immediate attention. These items are flagged in the report below and we recommend addressing them as soon as possible.
 
@@ -859,10 +861,10 @@ ${COMPANY.phone}`;
                             <div className="absolute left-0 top-0 bottom-0 w-2 bg-[#38BDF8]"></div>
                             <div className="grid grid-cols-2 gap-4 items-center">
                                 <div>
-                                    <div className="text-[#38BDF8] font-bold text-lg">Ready to talk about next steps?</div>
+                                    <div className="text-[#38BDF8] font-bold text-lg">Ready to lock in your maintenance plan?</div>
                                     <div className="text-sm text-slate-300 mt-2 leading-relaxed">
-                                        This survey is complimentary — no obligation. Whenever you're ready to address any findings,
-                                        give us a call. We're local, we answer the phone, and we quote work upfront so there are no surprises.
+                                        Reply to this email or call <strong className="text-white">{COMPANY.phone}</strong> and we'll get your first visit on the calendar this week.
+                                        This survey is complimentary — no obligation, no fine print. We're local, we answer the phone, and we quote work upfront so there are no surprises.
                                     </div>
                                 </div>
                                 <div className="text-right">
